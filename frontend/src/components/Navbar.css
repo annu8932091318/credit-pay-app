@@ -1,0 +1,97 @@
+.navbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.navbar-brand {
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+/* Dark mode adjustments */
+[class*="MuiAppBar-root"] {
+  transition: all 0.3s ease;
+}
+
+/* Dark mode classes */
+.MuiPaper-root.MuiDrawer-paper[data-mui-color-scheme="dark"],
+.MuiPaper-root.MuiMenu-paper[data-mui-color-scheme="dark"],
+.MuiAppBar-root[data-mui-color-scheme="dark"] {
+  background-color: #1f2937;
+  color: #e5e7eb;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Enhance active item visibility in dark mode */
+[data-mui-color-scheme="dark"] .active-nav-item {
+  color: #90caf9 !important;
+  border-color: #90caf9 !important;
+}
+
+.active-nav-item {
+  color: #1976d2;
+  font-weight: bold;
+}
+
+.nav-drawer {
+  width: 250px;
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.drawer-list-item.active {
+  background-color: rgba(25, 118, 210, 0.08);
+  border-left: 4px solid #1976d2;
+}
+
+.drawer-list-item.active .MuiListItemIcon-root,
+.drawer-list-item.active .MuiListItemText-root {
+  color: #1976d2;
+}
+
+/* Dark mode */
+[data-mui-color-scheme="dark"] .drawer-list-item.active {
+  background-color: rgba(144, 202, 249, 0.16);
+  border-left: 4px solid #90caf9;
+}
+
+[data-mui-color-scheme="dark"] .drawer-list-item.active .MuiListItemIcon-root,
+[data-mui-color-scheme="dark"] .drawer-list-item.active .MuiListItemText-root {
+  color: #90caf9;
+}
+
+.user-avatar {
+  background-color: #1976d2;
+}
+
+.profile-menu {
+  min-width: 200px;
+}
+
+.profile-menu-item {
+  padding: 8px 16px;
+}
+
+.profile-menu-item:hover {
+  background-color: rgba(25, 118, 210, 0.08);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 960px) {
+  .navbar-nav {
+    display: none;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 961px) {
+  .navbar-toggle {
+    display: none;
+  }
+}
