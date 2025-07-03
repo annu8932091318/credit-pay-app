@@ -4,12 +4,23 @@ const common = require('./commonFunctions');
 // --- Customers ---
 exports.getCustomers = async (req, res) => {
   try {
-    const customers = await Customer.find().sort({ lastTransactionDate: -1 });
+    let customers;
+    
+    try {
+      // Try to use the sort method first
+      customers = await Customer.find().sort({ lastTransactionDate: -1 });
+    } catch (sortError) {
+      // If sort fails, try to get customers without sorting
+      console.log('Sort failed, falling back to unsorted list:', sortError.message);
+      customers = await Customer.find();
+    }
+    
     console.log(`Found ${customers.length} customers in the database`);
     
     // Ensure we return appropriate data
     const formattedCustomers = customers.map(customer => {
-      const customerObj = customer.toObject();
+      // Handle both mongoose documents and plain objects
+      const customerObj = customer.toObject ? customer.toObject() : customer;
       return {
         ...customerObj,
         totalOwed: customerObj.totalOwed || 0,
