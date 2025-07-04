@@ -6,6 +6,11 @@
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   margin: 0;
   font-family: 'Poppins', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen',

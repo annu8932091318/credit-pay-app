@@ -68,7 +68,7 @@ function SidebarNav({ open, onClose, drawerWidth = 240 }) {
       >
         <Box 
           component="img" 
-          src="/logo192.png" 
+          src="https://ik.imagekit.io/credit/IMG_1950-fotor-bg-remover-20250704174641.png?updatedAt=1751631431189" 
           alt="Credit Pay Logo" 
           sx={{ 
             height: 45, 

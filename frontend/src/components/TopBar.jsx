@@ -72,6 +72,27 @@ function TopBar({ shopName = 'Your Shop', onSidebarToggle }) {
             </IconButton>
           )}
           
+          {/* App Logo on extreme left */}
+          <Box 
+            component="img" 
+            src="https://ik.imagekit.io/credit/IMG_1950-fotor-bg-remover-20250704174641.png?updatedAt=1751631431189" 
+            alt="Credit Pay Logo" 
+            sx={{ 
+              height: 40, 
+              width: 'auto', 
+              mr: 2,
+              ml: isMobile ? 0 : -1,
+              display: 'flex',
+              filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.2))',
+              transition: 'transform 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'scale(1.05)',
+                cursor: 'pointer'
+              }
+            }}
+            onClick={() => navigate('/dashboard')}
+          />
+          
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Chip
               icon={<StoreIcon fontSize="small" />}
