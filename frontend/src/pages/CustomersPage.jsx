@@ -25,6 +25,11 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Avatar,
+  Tooltip,
+  Badge,
+  Fade,
+  Chip
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -33,12 +38,20 @@ import {
   Phone as PhoneIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
+  PersonAdd as PersonAddIcon,
+  FilterList as FilterListIcon,
+  SortByAlpha as SortIcon,
+  WhatsApp as WhatsAppIcon,
+  Info as InfoIcon,
+  CreditCard as CreditCardIcon,
+  AccessTime as AccessTimeIcon
 } from '@mui/icons-material';
 
 import { fetchCustomers, createCustomer, fetchSales, sendOTP, verifyOTP } from '../api';
 import { useNotification } from '../components/NotificationSnackbar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ConfirmDialog from '../components/ConfirmDialog';
+import commonStyles from '../styles/commonStyles';
 
 function CustomersPage() {
   const navigate = useNavigate();
@@ -338,33 +351,168 @@ function CustomersPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Customers</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setOpenAddDialog(true)}
-        >
-          Add New Customer
-        </Button>
-      </Box>
-      
-      {/* Search Box */}
-      <TextField
-        fullWidth
-        placeholder="Search by name or phone number"
-        variant="outlined"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        sx={{ mb: 3 }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon />
-            </InputAdornment>
-          ),
+      {/* Page Header with Gradient Background */}
+      <Paper 
+        elevation={0} 
+        sx={{
+          background: theme => theme.palette.mode === 'dark' 
+            ? commonStyles.gradients.primaryDark
+            : commonStyles.gradients.primary,
+          p: 3,
+          mb: 4,
+          borderRadius: 2,
+          color: 'white',
+          position: 'relative',
+          overflow: 'hidden'
         }}
-      />
+      >
+        <Box sx={{ 
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: '150px',
+          height: '150px',
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.1)',
+          transform: 'translate(30%, -30%)',
+        }} />
+        
+        <Box sx={{
+          position: 'relative',
+          zIndex: 1,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <Box>
+            <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ textShadow: '0px 2px 3px rgba(0,0,0,0.2)' }}>
+              Customers
+            </Typography>
+            <Typography variant="subtitle1">
+              Manage your customer database and view credit details
+            </Typography>
+          </Box>
+          
+          <Button
+            variant="contained"
+            startIcon={<PersonAddIcon />}
+            onClick={() => setOpenAddDialog(true)}
+            sx={{
+              bgcolor: 'white',
+              color: theme => theme.palette.primary.main,
+              fontWeight: 600,
+              '&:hover': {
+                bgcolor: 'rgba(255,255,255,0.9)',
+              },
+              boxShadow: theme => commonStyles.customShadows.button(theme.palette.mode === 'dark')
+            }}
+          >
+            Add New Customer
+          </Button>
+        </Box>
+      </Paper>
+      
+      {/* Search and Filters Box */}
+      <Paper elevation={2} sx={{ 
+        p: 2, 
+        mb: 3, 
+        borderRadius: 2,
+        boxShadow: theme => commonStyles.customShadows.card(theme.palette.mode === 'dark')
+      }}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} md={8}>
+            <TextField
+              fullWidth
+              placeholder="Search by name or phone number"
+              variant="outlined"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="primary" />
+                  </InputAdornment>
+                ),
+                endAdornment: searchTerm && (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={() => setSearchTerm('')}>
+                      <Fade in={true}>
+                        <Badge color="error" variant="dot">
+                          <FilterListIcon fontSize="small" />
+                        </Badge>
+                      </Fade>
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: {
+                  borderRadius: 1.5,
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: theme => theme.palette.mode === 'dark' 
+                      ? 'rgba(255,255,255,0.15)' 
+                      : 'rgba(0,0,0,0.1)'
+                  }
+                }
+              }}
+            />
+          </Grid>
+          
+          <Grid item xs={12} md={4}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+              <Tooltip title="Sort by name" arrow>
+                <Button 
+                  variant="outlined"
+                  startIcon={<SortIcon />}
+                  size="medium"
+                  sx={{ 
+                    borderRadius: 1.5,
+                    borderColor: theme => theme.palette.mode === 'dark' 
+                      ? 'rgba(255,255,255,0.15)' 
+                      : 'rgba(0,0,0,0.1)'
+                  }}
+                >
+                  Sort
+                </Button>
+              </Tooltip>
+              
+              <Tooltip title="Filter results" arrow>
+                <Button 
+                  variant="outlined"
+                  startIcon={<FilterListIcon />}
+                  size="medium"
+                  sx={{ 
+                    borderRadius: 1.5,
+                    borderColor: theme => theme.palette.mode === 'dark' 
+                      ? 'rgba(255,255,255,0.15)' 
+                      : 'rgba(0,0,0,0.1)'
+                  }}
+                >
+                  Filter
+                </Button>
+              </Tooltip>
+            </Box>
+          </Grid>
+        </Grid>
+      </Paper>
+      
+      {/* Customers Count */}
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="body2" color="text.secondary">
+          {filteredCustomers.length} customers found
+        </Typography>
+        <Chip 
+          icon={<InfoIcon fontSize="small" />} 
+          label="Click on a customer to view details" 
+          size="small"
+          variant="outlined"
+          sx={{
+            borderRadius: 1.5,
+            fontSize: '0.75rem',
+            borderColor: theme => theme.palette.mode === 'dark' 
+              ? 'rgba(255,255,255,0.15)' 
+              : 'rgba(0,0,0,0.1)'
+          }}
+        />
+      </Box>
       
       {/* Customers List */}
       {loading ? (
@@ -373,135 +521,345 @@ function CustomersPage() {
         <>
           {isDesktop ? (
             // Table view for desktop
-            <TableContainer component={Paper} elevation={2}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Phone</TableCell>
-                    <TableCell>Total Owed</TableCell>
-                    <TableCell>Last Transaction</TableCell>
-                    <TableCell align="right">Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredCustomers.length > 0 ? (
-                    filteredCustomers.map((customer) => (
-                      <TableRow key={customer._id} hover>
-                        <TableCell>{customer.name}</TableCell>
-                        <TableCell>{customer.phone}</TableCell>
-                        <TableCell>
-                          {formatCurrency(customer.totalOwed || 0)}
-                        </TableCell>
-                        <TableCell>
-                          {formatDate(customer.lastTransactionDate)}
-                        </TableCell>
-                        <TableCell align="right">
-                          <IconButton
-                            color="primary"
-                            onClick={() => navigate(`/customers/${customer._id}`)}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                          <IconButton
-                            color="error"
-                            onClick={() => handleDeleteCustomer(customer._id)}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} align="center">
-                        No customers found
+            <Paper elevation={2} sx={{
+              overflow: 'hidden',
+              borderRadius: 2,
+              boxShadow: theme => commonStyles.customShadows.card(theme.palette.mode === 'dark')
+            }}>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ 
+                      bgcolor: theme => theme.palette.mode === 'dark' 
+                        ? 'rgba(255,255,255,0.05)' 
+                        : 'rgba(0,0,0,0.02)' 
+                    }}>
+                      <TableCell>
+                        <Typography variant="subtitle2" fontWeight={600}>Name</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="subtitle2" fontWeight={600}>Phone</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="subtitle2" fontWeight={600}>Total Owed</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="subtitle2" fontWeight={600}>Last Transaction</Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography variant="subtitle2" fontWeight={600}>Actions</Typography>
                       </TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                  </TableHead>
+                  <TableBody>
+                    {filteredCustomers.length > 0 ? (
+                      filteredCustomers.map((customer) => (
+                        <TableRow 
+                          key={customer._id} 
+                          hover 
+                          onClick={() => navigate(`/customers/${customer._id}`)}
+                          sx={{ 
+                            cursor: 'pointer',
+                            '&:hover': {
+                              bgcolor: theme => theme.palette.mode === 'dark' 
+                                ? 'rgba(255,255,255,0.05)' 
+                                : 'rgba(0,0,0,0.02)'
+                            }
+                          }}
+                        >
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Avatar 
+                                sx={{ 
+                                  width: 32, 
+                                  height: 32, 
+                                  mr: 2, 
+                                  bgcolor: theme => theme.palette.primary.main,
+                                  fontSize: '0.9rem'
+                                }}
+                              >
+                                {customer.name.charAt(0)}
+                              </Avatar>
+                              <Typography fontWeight={500}>{customer.name}</Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <WhatsAppIcon 
+                                sx={{ 
+                                  mr: 1, 
+                                  fontSize: 16, 
+                                  color: '#25D366' 
+                                }} 
+                              />
+                              {customer.phone}
+                            </Box>
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={formatCurrency(customer.totalOwed || 0)}
+                              variant={customer.totalOwed > 0 ? "filled" : "outlined"}
+                              color={customer.totalOwed > 0 ? "primary" : "default"}
+                              size="small"
+                              icon={<CreditCardIcon />}
+                              sx={{
+                                ...commonStyles.statusChip,
+                                fontWeight: 600,
+                              }}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <AccessTimeIcon sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                              <Typography variant="body2" color="text.secondary">
+                                {formatDate(customer.lastTransactionDate)}
+                              </Typography>
+                            </Box>
+                          </TableCell>
+                          <TableCell align="right">
+                            <Tooltip title="Edit customer" arrow>
+                              <IconButton
+                                color="primary"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/customers/${customer._id}`);
+                                }}
+                                sx={{ 
+                                  bgcolor: theme => theme.palette.mode === 'dark' 
+                                    ? 'rgba(25, 118, 210, 0.12)' 
+                                    : 'rgba(25, 118, 210, 0.08)',
+                                  mr: 1
+                                }}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete customer" arrow>
+                              <IconButton
+                                color="error"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteCustomer(customer._id);
+                                }}
+                                sx={{ 
+                                  bgcolor: theme => theme.palette.mode === 'dark' 
+                                    ? 'rgba(211, 47, 47, 0.12)' 
+                                    : 'rgba(211, 47, 47, 0.08)'
+                                }}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                          <Box sx={{ textAlign: 'center' }}>
+                            <PersonIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+                            <Typography variant="h6" color="text.secondary" gutterBottom>
+                              No customers found
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Try adjusting your search or add a new customer
+                            </Typography>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
           ) : (
             // Card view for mobile
-            <Grid container spacing={2}>
+            <Box>
               {filteredCustomers.length > 0 ? (
                 filteredCustomers.map((customer) => (
-                  <Grid item xs={12} key={customer._id}>
-                    <Card elevation={2}>
-                      <CardContent>
-                        <Typography variant="h6" component="div">
-                          {customer.name}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                          <PhoneIcon sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
-                          <Typography variant="body2" color="text.secondary">
-                            {customer.phone}
+                  <Card 
+                    key={customer._id} 
+                    elevation={2} 
+                    sx={{
+                      mb: 2, 
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      boxShadow: theme => commonStyles.customShadows.card(theme.palette.mode === 'dark'),
+                      ...commonStyles.cardWithHover
+                    }}
+                    onClick={() => navigate(`/customers/${customer._id}`)}
+                  >
+                    <Box sx={{ 
+                      height: 8, 
+                      bgcolor: customer.totalOwed > 0 
+                        ? theme => theme.palette.primary.main 
+                        : 'success.main'
+                    }} />
+                    <CardContent>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                        <Avatar 
+                          sx={{ 
+                            width: 40, 
+                            height: 40, 
+                            mr: 2, 
+                            bgcolor: theme => theme.palette.primary.main
+                          }}
+                        >
+                          {customer.name.charAt(0)}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="h6" component="div" fontWeight={600}>
+                            {customer.name}
                           </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <WhatsAppIcon sx={{ fontSize: 16, mr: 0.5, color: '#25D366' }} />
+                            <Typography variant="body2" color="text.secondary">
+                              {customer.phone}
+                            </Typography>
+                          </Box>
                         </Box>
-                        <Divider sx={{ my: 1 }} />
-                        <Grid container spacing={1}>
-                          <Grid item xs={6}>
-                            <Typography variant="body2" color="text.secondary">
-                              Total Owed
-                            </Typography>
-                            <Typography variant="body1" fontWeight="bold">
-                              {formatCurrency(customer.totalOwed || 0)}
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Typography variant="body2" color="text.secondary">
-                              Last Transaction
-                            </Typography>
+                      </Box>
+                      
+                      <Divider sx={{ my: 1.5 }} />
+                      
+                      <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Total Owed
+                          </Typography>
+                          <Typography 
+                            variant="h6" 
+                            fontWeight="bold"
+                            color={customer.totalOwed > 0 ? 'primary.main' : 'success.main'}
+                          >
+                            {formatCurrency(customer.totalOwed || 0)}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Last Transaction
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <AccessTimeIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
                             <Typography variant="body2">
                               {formatDate(customer.lastTransactionDate)}
                             </Typography>
-                          </Grid>
+                          </Box>
                         </Grid>
-                      </CardContent>
-                      <CardActions>
-                        <Button 
-                          size="small" 
-                          onClick={() => navigate(`/customers/${customer._id}`)}
-                        >
-                          View Details
-                        </Button>
-                        <Box sx={{ flexGrow: 1 }} />
-                        <IconButton 
-                          size="small" 
-                          color="error"
-                          onClick={() => handleDeleteCustomer(customer._id)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </CardActions>
-                    </Card>
-                  </Grid>
+                      </Grid>
+                    </CardContent>
+                    <Divider />
+                    <CardActions sx={{ px: 2, py: 1 }}>
+                      <Button 
+                        size="small"
+                        variant="text"
+                        color="primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/customers/${customer._id}`);
+                        }}
+                        startIcon={<EditIcon />}
+                      >
+                        Details
+                      </Button>
+                      <Box sx={{ flexGrow: 1 }} />
+                      <IconButton 
+                        size="small" 
+                        color="error"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCustomer(customer._id);
+                        }}
+                        sx={{ 
+                          bgcolor: theme => theme.palette.mode === 'dark' 
+                            ? 'rgba(211, 47, 47, 0.12)' 
+                            : 'rgba(211, 47, 47, 0.08)'
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </CardActions>
+                  </Card>
                 ))
               ) : (
-                <Grid item xs={12}>
-                  <Card>
-                    <CardContent sx={{ textAlign: 'center' }}>
-                      <Typography>No customers found</Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
+                <Paper sx={{ 
+                  p: 4, 
+                  textAlign: 'center',
+                  borderRadius: 2,
+                  boxShadow: theme => commonStyles.customShadows.card(theme.palette.mode === 'dark')
+                }}>
+                  <PersonIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No customers found
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Try adjusting your search or add a new customer
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    startIcon={<PersonAddIcon />}
+                    onClick={() => setOpenAddDialog(true)}
+                  >
+                    Add New Customer
+                  </Button>
+                </Paper>
               )}
-            </Grid>
+            </Box>
           )}
         </>
       )}
       
       {/* Add Customer Dialog */}
-      <Dialog open={openAddDialog} onClose={() => {
-        setOpenAddDialog(false);
-        setOtpSent(false);
-        setOtp('');
-        setOtpError('');
-        setFormErrors({});
-      }}>
-        <DialogTitle>{otpSent ? 'Verify Phone Number' : 'Add New Customer'}</DialogTitle>
-        <DialogContent>
+      <Dialog 
+        open={openAddDialog} 
+        onClose={() => {
+          setOpenAddDialog(false);
+          setOtpSent(false);
+          setOtp('');
+          setOtpError('');
+          setFormErrors({});
+        }}
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: theme => commonStyles.customShadows.dialog(theme.palette.mode === 'dark'),
+            maxWidth: '500px',
+            width: '100%'
+          }
+        }}
+      >
+        <Box sx={{ 
+          background: theme => theme.palette.mode === 'dark' 
+            ? commonStyles.gradients.primaryDark
+            : commonStyles.gradients.primary,
+          p: 2,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2,
+          color: 'white'
+        }}>
+          <Avatar 
+            sx={{ 
+              bgcolor: 'rgba(255,255,255,0.2)', 
+              width: 42, 
+              height: 42 
+            }}
+          >
+            {otpSent ? <PhoneIcon /> : <PersonAddIcon />}
+          </Avatar>
+          <Box>
+            <DialogTitle sx={{ p: 0, color: 'inherit' }}>
+              {otpSent ? 'Verify Phone Number' : 'Add New Customer'}
+            </DialogTitle>
+            <Typography variant="body2">
+              {otpSent 
+                ? 'Enter the OTP sent to your phone' 
+                : 'Add a new customer to your database'}
+            </Typography>
+          </Box>
+        </Box>
+        
+        <DialogContent sx={{ mt: 2 }}>
           <TextField
             autoFocus={!otpSent}
             margin="dense"
@@ -517,11 +875,18 @@ function CustomersPage() {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <PersonIcon />
+                  <PersonIcon color="primary" />
                 </InputAdornment>
               ),
             }}
+            sx={{ 
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 1.5
+              }
+            }}
           />
+          
           <TextField
             margin="dense"
             name="phone"
@@ -532,11 +897,16 @@ function CustomersPage() {
             value={newCustomer.phone}
             onChange={handleInputChange}
             error={!!formErrors.phone}
-            helperText={formErrors.phone}
+            helperText={formErrors.phone || "Enter a 10-digit mobile number"}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <PhoneIcon />
+                  <PhoneIcon color={otpSent ? "disabled" : "primary"} />
+                </InputAdornment>
+              ),
+              endAdornment: !otpSent && newCustomer.phone.length === 10 && (
+                <InputAdornment position="end">
+                  <WhatsAppIcon fontSize="small" sx={{ color: '#25D366' }} />
                 </InputAdornment>
               ),
             }}
@@ -544,38 +914,82 @@ function CustomersPage() {
               maxLength: 10,
             }}
             disabled={otpSent}
+            sx={{ 
+              mb: otpSent ? 2 : 0,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 1.5
+              }
+            }}
           />
           
           {otpSent && (
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Enter OTP"
-              type="text"
-              fullWidth
-              variant="outlined"
-              value={otp}
-              onChange={(e) => {
-                setOtp(e.target.value);
-                if (otpError) setOtpError('');
-              }}
-              error={!!otpError}
-              helperText={otpError || "A 4-digit OTP has been sent to your phone"}
-              inputProps={{
-                maxLength: 4,
-              }}
-              sx={{ mt: 2 }}
-            />
+            <Fade in={otpSent}>
+              <Box>
+                <Paper 
+                  variant="outlined" 
+                  sx={{ 
+                    p: 2, 
+                    mb: 2, 
+                    bgcolor: theme => theme.palette.mode === 'dark' 
+                      ? 'rgba(0,0,0,0.2)' 
+                      : 'rgba(0,0,0,0.02)',
+                    borderRadius: 1.5
+                  }}
+                >
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    A 4-digit OTP has been sent to your phone number:
+                  </Typography>
+                  <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
+                    {newCustomer.phone}
+                  </Typography>
+                </Paper>
+                
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  label="Enter OTP"
+                  type="text"
+                  fullWidth
+                  variant="outlined"
+                  value={otp}
+                  onChange={(e) => {
+                    setOtp(e.target.value);
+                    if (otpError) setOtpError('');
+                  }}
+                  error={!!otpError}
+                  helperText={otpError}
+                  inputProps={{
+                    maxLength: 4,
+                  }}
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 1.5
+                    }
+                  }}
+                />
+              </Box>
+            </Fade>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => {
-            setOpenAddDialog(false);
-            setOtpSent(false);
-            setOtp('');
-            setOtpError('');
-            setFormErrors({});
-          }}>Cancel</Button>
+        
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button 
+            onClick={() => {
+              setOpenAddDialog(false);
+              setOtpSent(false);
+              setOtp('');
+              setOtpError('');
+              setFormErrors({});
+            }}
+            variant="outlined"
+            sx={{ 
+              borderRadius: 1.5,
+              textTransform: 'none',
+              mr: 1
+            }}
+          >
+            Cancel
+          </Button>
           
           {otpSent && (
             <Button 
@@ -583,6 +997,13 @@ function CustomersPage() {
                 setOtpSent(false);
                 setOtp('');
                 setOtpError('');
+              }}
+              variant="outlined"
+              color="info"
+              sx={{ 
+                borderRadius: 1.5,
+                textTransform: 'none',
+                mr: 1
               }}
             >
               Back
@@ -593,6 +1014,12 @@ function CustomersPage() {
             onClick={handleAddCustomer} 
             variant="contained" 
             disabled={verifying}
+            disableElevation
+            sx={{ 
+              borderRadius: 1.5,
+              textTransform: 'none',
+              px: 3
+            }}
           >
             {verifying ? 'Processing...' : otpSent ? 'Verify OTP' : 'Send OTP'}
           </Button>

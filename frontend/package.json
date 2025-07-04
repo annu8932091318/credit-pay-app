@@ -11,6 +11,8 @@
     "axios": "^1.10.0",
     "cra-template-pwa": "2.0.0",
     "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.0",
+    "razorpay-checkout": "^1.0.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^6.30.1",

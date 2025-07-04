@@ -1,57 +1,105 @@
 import React from 'react';
 import { 
-  CircularProgress, 
   Backdrop, 
   Box, 
-  Typography 
+  Typography, 
+  Paper,
+  useTheme,
+  Fade
 } from '@mui/material';
+import ClassicLoader from './ClassicLoader';
 
 function LoadingSpinner({ 
   open = false, 
   message = 'Loading...', 
-  size = 40,
+  size = 'medium',
   fullScreen = false
 }) {
+  const theme = useTheme();
+  
   if (fullScreen) {
     return (
       <Backdrop
         open={open}
         sx={{ 
-          color: '#fff', 
+          color: theme.palette.primary.main, 
           zIndex: (theme) => theme.zIndex.drawer + 1,
-          flexDirection: 'column'
+          flexDirection: 'column',
+          backdropFilter: 'blur(3px)',
+          backgroundColor: theme.palette.mode === 'dark' 
+            ? 'rgba(0, 0, 0, 0.8)' 
+            : 'rgba(255, 255, 255, 0.8)'
         }}
       >
-        <CircularProgress color="inherit" size={size} />
-        {message && (
-          <Typography 
-            variant="h6" 
-            sx={{ mt: 2, color: 'common.white' }}
+        <Fade in={open}>
+          <Paper
+            elevation={6}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '32px 50px',
+              borderRadius: '16px',
+              backgroundColor: theme.palette.mode === 'dark' 
+                ? 'rgba(30, 30, 30, 0.95)' 
+                : 'rgba(255, 255, 255, 0.95)',
+              minWidth: '280px',
+            }}
           >
-            {message}
-          </Typography>
-        )}
+            <ClassicLoader 
+              size="large"
+              text=""
+            />
+            {message && (
+              <Typography 
+                variant="subtitle1" 
+                sx={{ 
+                  mt: 3,
+                  fontWeight: 500,
+                  letterSpacing: '0.01em'
+                }}
+              >
+                {message}
+              </Typography>
+            )}
+          </Paper>
+        </Fade>
       </Backdrop>
     );
   }
 
   return (
-    <Box
-      sx={{
-        display: open ? 'flex' : 'none',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: 3,
-      }}
-    >
-      <CircularProgress size={size} />
-      {message && (
-        <Typography variant="body2" sx={{ mt: 1 }}>
-          {message}
-        </Typography>
-      )}
-    </Box>
+    <Fade in={open}>
+      <Box
+        sx={{
+          display: open ? 'flex' : 'none',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 5,
+          width: '100%',
+          minHeight: '120px'
+        }}
+      >
+        <ClassicLoader 
+          size="medium"
+          text=""
+        />
+        {message && (
+          <Typography 
+            variant="subtitle2" 
+            sx={{ 
+              mt: 2,
+              fontWeight: 500,
+              opacity: 0.9
+            }}
+          >
+            {message}
+          </Typography>
+        )}
+      </Box>
+    </Fade>
   );
 }
 

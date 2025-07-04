@@ -86,28 +86,81 @@ function Navbar() {
   // Drawer content
   const drawerContent = (
     <Box
-      sx={{ width: 250, height: '100%', display: 'flex', flexDirection: 'column' }}
+      sx={{ width: 280, height: '100%', display: 'flex', flexDirection: 'column' }}
       role="presentation"
       onClick={toggleDrawer(false)}
       onKeyDown={toggleDrawer(false)}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }} className="drawer-header">
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Credit Pay</Typography>
-        <IconButton onClick={toggleDrawer(false)}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 3 }} className="drawer-header">
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            fontWeight: 600, 
+            letterSpacing: '0.02em',
+            textShadow: isDarkMode ? '0 2px 4px rgba(0,0,0,0.3)' : 'none'
+          }}
+        >
+          Credit Pay
+        </Typography>
+        <IconButton 
+          onClick={toggleDrawer(false)}
+          sx={{
+            bgcolor: 'rgba(255,255,255,0.2)',
+            '&:hover': {
+              bgcolor: 'rgba(255,255,255,0.3)'
+            }
+          }}
+        >
           <ChevronLeftIcon />
         </IconButton>
       </Box>
-      <Divider />
 
       {/* User profile section */}
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
-        <Avatar sx={{ mr: 2, bgcolor: 'primary.main' }} className="user-avatar">S</Avatar>
+      <Box 
+        sx={{ 
+          p: 2.5,
+          display: 'flex', 
+          alignItems: 'center',
+          bgcolor: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'
+        }}
+      >
+        <Avatar 
+          sx={{ 
+            mr: 2, 
+            width: 48,
+            height: 48,
+            boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+          }} 
+          className="user-avatar"
+        >
+          S
+        </Avatar>
         <Box>
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'text.primary' }}>Shop Owner</Typography>
-          <Typography variant="body2" color="text.secondary">Admin</Typography>
+          <Typography 
+            variant="subtitle1" 
+            sx={{ 
+              fontWeight: 600, 
+              color: 'text.primary',
+              fontSize: '0.95rem',
+              letterSpacing: '0.01em'
+            }}
+          >
+            Shop Owner
+          </Typography>
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{
+              fontSize: '0.8rem',
+              letterSpacing: '0.02em',
+              mt: 0.3
+            }}
+          >
+            Admin
+          </Typography>
         </Box>
       </Box>
-      <Divider />
+      <Divider sx={{ my: 1 }} />
 
       {/* Navigation links */}
       <List sx={{ flexGrow: 1 }}>
@@ -141,11 +194,6 @@ function Navbar() {
         ))}
       </List>
       <Divider />
-
-      {/* Theme Toggle */}
-      <Box sx={{ px: 2, py: 2, display: 'flex', justifyContent: 'center' }}>
-        <ThemeToggle isDark={isDarkMode} onToggle={toggleTheme} />
-      </Box>
 
       {/* Profile options section */}
       <Typography variant="overline" sx={{ px: 2, mt: 2, display: 'block', color: 'text.secondary' }}>
@@ -181,10 +229,10 @@ function Navbar() {
         color="default" 
         elevation={isDarkMode ? 6 : 3} 
         sx={{ 
-          bgcolor: isDarkMode ? 'background.paper' : 'white',
+          bgcolor: isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
           color: isDarkMode ? 'text.primary' : 'inherit',
           transition: 'background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease',
-          borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.12)' : 'none'
+          borderBottom: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : 'none'
         }} 
         className="navbar"
       >
@@ -195,7 +243,13 @@ function Navbar() {
               color="inherit"
               aria-label="menu"
               onClick={toggleDrawer(true)}
-              sx={{ mr: 2 }}
+              sx={{ 
+                mr: 2,
+                transition: 'transform 0.2s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)'
+                }
+              }}
               className="navbar-toggle"
             >
               <MenuIcon />
@@ -206,14 +260,21 @@ function Navbar() {
             variant="h6" 
             component={Link} 
             to="/" 
-            sx={{ flexGrow: 1, color: 'inherit', textDecoration: 'none', fontWeight: 'bold' }}
+            sx={{ 
+              flexGrow: 1, 
+              color: 'inherit', 
+              textDecoration: 'none', 
+              fontWeight: 600,
+              letterSpacing: '0.02em',
+              fontSize: { xs: '1.1rem', md: '1.25rem' }
+            }}
             className="navbar-brand"
           >
             Credit Pay
           </Typography>
 
           {!isMobile && (
-            <Box sx={{ display: 'flex', gap: 1 }} className="navbar-nav">
+            <Box sx={{ display: 'flex', gap: 0.5 }} className="navbar-nav">
               {navItems.map((item) => (
                 <Button
                   key={item.path}
@@ -221,27 +282,28 @@ function Navbar() {
                   to={item.path}
                   color={isActive(item.path) ? 'primary' : 'inherit'}
                   sx={{ 
-                    fontWeight: isActive(item.path) ? 'bold' : 'regular',
-                    borderBottom: isActive(item.path) ? `2px solid ${isDarkMode ? '#90caf9' : '#1565c0'}` : '2px solid transparent',
-                    borderRadius: 0,
+                    fontWeight: isActive(item.path) ? 600 : 500,
+                    borderRadius: 1.5,
                     px: 2,
+                    py: 0.8,
                     '&:hover': {
-                      bgcolor: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+                      bgcolor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
                     },
                     color: isActive(item.path) 
-                      ? (isDarkMode ? '#90caf9' : '#1565c0')
+                      ? (isDarkMode ? '#90caf9' : '#0f4c81')
                       : 'text.primary'
                   }}
                   startIcon={
                     <Box sx={{ 
                       color: isActive(item.path) 
-                        ? (isDarkMode ? '#90caf9' : '#1565c0')
-                        : 'text.secondary'
+                        ? (isDarkMode ? '#90caf9' : '#0f4c81')
+                        : 'text.secondary',
+                      mr: -0.5
                     }}>
                       {item.icon}
                     </Box>
                   }
-                  className={isActive(item.path) ? "active-nav-item" : ""}
+                  className={`nav-button ${isActive(item.path) ? "active-nav-item active-nav-button" : ""}`}
                 >
                   {item.label}
                 </Button>
@@ -258,12 +320,29 @@ function Navbar() {
             <IconButton 
               onClick={handleOpenProfileMenu} 
               size="small" 
-              sx={{ ml: 2 }}
+              sx={{ 
+                ml: 2,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)'
+                }
+              }}
               aria-controls={profileMenuAnchor ? 'profile-menu' : undefined}
               aria-haspopup="true"
               aria-expanded={profileMenuAnchor ? 'true' : undefined}
             >
-              <Avatar sx={{ bgcolor: isDarkMode ? '#90caf9' : '#1565c0' }} className="user-avatar">S</Avatar>
+              <Avatar 
+                className="user-avatar"
+                sx={{
+                  width: 38,
+                  height: 38,
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                }}
+              >
+                S
+              </Avatar>
             </IconButton>
           </Tooltip>
           
@@ -280,9 +359,10 @@ function Navbar() {
               sx: {
                 overflow: 'visible',
                 filter: isDarkMode 
-                  ? 'drop-shadow(0px 4px 12px rgba(0,0,0,0.5))' 
-                  : 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                  ? 'drop-shadow(0px 4px 15px rgba(0,0,0,0.5))' 
+                  : 'drop-shadow(0px 2px 10px rgba(0,0,0,0.15))',
                 mt: 1.5,
+                borderRadius: 2,
                 bgcolor: isDarkMode ? '#1f2937' : '#ffffff',
                 color: isDarkMode ? '#e5e7eb' : 'rgba(0, 0, 0, 0.87)',
                 borderRadius: 1,
@@ -324,10 +404,11 @@ function Navbar() {
         className="nav-drawer"
         PaperProps={{
           sx: {
-            bgcolor: isDarkMode ? '#1f2937' : '#ffffff',
-            color: isDarkMode ? '#e5e7eb' : 'rgba(0, 0, 0, 0.87)',
-            borderRight: isDarkMode ? '1px solid rgba(255, 255, 255, 0.12)' : 'none',
-            boxShadow: isDarkMode ? '4px 0 10px rgba(0,0,0,0.5)' : '2px 0 8px rgba(0,0,0,0.1)'
+            bgcolor: isDarkMode ? 'rgba(30, 30, 30, 0.98)' : '#ffffff',
+            color: isDarkMode ? '#f5f5f5' : 'rgba(0, 0, 0, 0.87)',
+            borderRight: isDarkMode ? '1px solid rgba(255, 255, 255, 0.08)' : 'none',
+            boxShadow: isDarkMode ? '4px 0 15px rgba(0,0,0,0.5)' : '2px 0 15px rgba(0,0,0,0.08)',
+            overflowX: 'hidden'
           }
         }}
         SlideProps={{

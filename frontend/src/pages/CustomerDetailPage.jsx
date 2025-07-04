@@ -160,62 +160,261 @@ function CustomerDetailPage() {
     return <LoadingSpinner open={true} fullScreen={true} />;
   }
 
+  const theme = useTheme();
+
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        <IconButton 
-          edge="start" 
-          onClick={() => navigate(-1)} 
-          sx={{ mr: 2 }}
-        >
-          <ArrowBackIcon />
-        </IconButton>
-        <Typography variant="h4">Customer Details</Typography>
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <IconButton 
+            onClick={() => navigate(-1)} 
+            sx={{ 
+              mr: 2, 
+              border: `1px solid ${alpha(theme.palette.divider, 0.2)}`,
+              borderRadius: 2,
+              '&:hover': {
+                bgcolor: alpha(theme.palette.primary.main, 0.05)
+              }
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+          <Box>
+            <Typography 
+              variant="h4" 
+              sx={{ 
+                fontWeight: 700,
+                background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                backgroundClip: 'text',
+                textFillColor: 'transparent',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                mb: 1
+              }}
+            >
+              Customer Profile
+            </Typography>
+            <Typography variant="body1" color="textSecondary">
+              View and manage customer details and transactions
+            </Typography>
+          </Box>
+        </Box>
       </Box>
       
       {/* Customer Summary */}
-      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={8}>
-            <Typography variant="h5">{customer.name}</Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-              {customer.phone}
+      <Card 
+        elevation={0} 
+        sx={{ 
+          borderRadius: 4,
+          border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          overflow: 'hidden',
+          boxShadow: theme.shadows[3],
+          mb: 4
+        }}
+      >
+        <Box
+          sx={{
+            p: 3,
+            background: theme.palette.mode === 'light'
+              ? `linear-gradient(120deg, ${alpha(theme.palette.info.light, 0.1)}, ${alpha(theme.palette.background.paper, 0.9)})`
+              : `linear-gradient(120deg, ${alpha(theme.palette.info.dark, 0.2)}, ${theme.palette.background.paper})`,
+            display: 'flex',
+            alignItems: 'center',
+            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+          }}
+        >
+          <Avatar
+            sx={{
+              bgcolor: alpha(theme.palette.primary.main, 0.15),
+              color: theme.palette.primary.main,
+              width: 60,
+              height: 60,
+              mr: 3,
+              fontSize: '2rem',
+              fontWeight: 700
+            }}
+          >
+            {customer.name ? customer.name.charAt(0).toUpperCase() : '?'}
+          </Avatar>
+          <Box>
+            <Typography variant="h5" fontWeight={600}>
+              {customer.name}
             </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+              <IconButton 
+                size="small" 
+                sx={{ 
+                  mr: 1, 
+                  color: theme.palette.success.main, 
+                  bgcolor: alpha(theme.palette.success.main, 0.1),
+                  '&:hover': {
+                    bgcolor: alpha(theme.palette.success.main, 0.2),
+                  } 
+                }}
+                onClick={() => window.open(`https://wa.me/${customer.phone}`, '_blank')}
+              >
+                <WhatsAppIcon fontSize="small" />
+              </IconButton>
+              <Typography variant="body1" color="textSecondary">
+                {customer.phone}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+        
+        <CardContent sx={{ p: 4 }}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={8}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  height: '100%',
+                  background: alpha(theme.palette.primary.main, 0.03),
+                  border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
+                }}
+              >
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                  Customer Information
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, mt: 2 }}>
+                  <Box>
+                    <Typography variant="body2" color="textSecondary">
+                      Customer ID
+                    </Typography>
+                    <Typography variant="body1">
+                      {customer._id ? customer._id.substring(0, 8).toUpperCase() : 'N/A'}
+                    </Typography>
+                  </Box>
+                  
+                  <Box>
+                    <Typography variant="body2" color="textSecondary">
+                      Joined On
+                    </Typography>
+                    <Typography variant="body1">
+                      {customer.createdAt ? formatDate(customer.createdAt) : 'Unknown'}
+                    </Typography>
+                  </Box>
+                  
+                  <Box>
+                    <Typography variant="body2" color="textSecondary">
+                      Total Transactions
+                    </Typography>
+                    <Typography variant="body1">
+                      {transactions.length}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Paper>
+            </Grid>
+            
+            <Grid item xs={12} md={4}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                  height: '100%',
+                  background: customer.totalOwed > 0 
+                    ? alpha(theme.palette.error.main, 0.05)
+                    : alpha(theme.palette.success.main, 0.05),
+                  border: `1px solid ${customer.totalOwed > 0 
+                    ? alpha(theme.palette.error.main, 0.2)
+                    : alpha(theme.palette.success.main, 0.2)}`
+                }}
+              >
+                <Typography 
+                  variant="subtitle1" 
+                  fontWeight={600} 
+                  color={customer.totalOwed > 0 ? 'error.main' : 'success.main'}
+                  gutterBottom
+                >
+                  Outstanding Balance
+                </Typography>
+                <Typography 
+                  variant="h3" 
+                  fontWeight={700}
+                  sx={{ 
+                    color: customer.totalOwed > 0 ? 'error.main' : 'success.main',
+                    mt: 2
+                  }}
+                >
+                  {formatCurrency(customer.totalOwed || 0)}
+                </Typography>
+                
+                <Button
+                  variant="contained"
+                  color="success"
+                  startIcon={<WhatsAppIcon />}
+                  onClick={handleSendReminder}
+                  disabled={sendingReminder || customer.totalOwed <= 0}
+                  fullWidth
+                  sx={{ 
+                    mt: 3,
+                    borderRadius: 8,
+                    py: 1.5,
+                    boxShadow: theme.shadows[4],
+                    background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
+                    '&:hover': {
+                      boxShadow: theme.shadows[8],
+                    },
+                    '&.Mui-disabled': {
+                      opacity: 0.6,
+                      background: theme.palette.action.disabledBackground
+                    }
+                  }}
+                >
+                  {sendingReminder ? 'Sending...' : 'Send Payment Reminder'}
+                </Button>
+              </Paper>
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: { xs: 'flex-start', md: 'flex-end' } }}>
-            <Typography variant="body2" color="text.secondary">
-              Total Outstanding
-            </Typography>
-            <Typography 
-              variant="h5" 
-              sx={{ 
-                color: customer.totalOwed > 0 ? 'error.main' : 'success.main',
-                mb: 2
-              }}
-            >
-              {formatCurrency(customer.totalOwed || 0)}
-            </Typography>
-          </Grid>
-          
-          <Grid item xs={12}>
-            <Button
-              variant="contained"
-              color="success"
-              startIcon={<WhatsAppIcon />}
-              onClick={handleSendReminder}
-              disabled={sendingReminder || customer.totalOwed <= 0}
-              fullWidth
-            >
-              {sendingReminder ? 'Sending...' : 'Send Payment Reminder'}
-            </Button>
-          </Grid>
-        </Grid>
-      </Paper>
+        </CardContent>
+      </Card>
       
       {/* Transactions List */}
-      <Typography variant="h5" gutterBottom>
-        Transaction History
-      </Typography>
+      <Box sx={{ 
+        mb: 2, 
+        display: 'flex', 
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}>
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            fontWeight: 600,
+            position: 'relative',
+            '&:after': {
+              content: '""',
+              position: 'absolute',
+              bottom: -8,
+              left: 0,
+              width: 60,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: theme.palette.primary.main
+            }
+          }}
+        >
+          Transaction History
+        </Typography>
+        
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<AddIcon />}
+          onClick={() => navigate('/add-sale', { state: { customerId: customer._id } })}
+          sx={{
+            textTransform: 'none',
+            fontWeight: 500,
+            borderRadius: 8,
+            borderWidth: '1.5px'
+          }}
+        >
+          Add Transaction
+        </Button>
+      </Box>
       
       <Paper elevation={1}>
         {transactions.length > 0 ? (

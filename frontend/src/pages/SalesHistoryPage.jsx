@@ -28,6 +28,13 @@ import {
   TablePagination,
   Card,
   CardContent,
+  Avatar,
+  Tooltip,
+  Badge,
+  Fade,
+  Divider,
+  Zoom,
+  alpha
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -35,12 +42,24 @@ import {
   ReceiptLong as ReceiptIcon,
   WhatsApp as WhatsAppIcon,
   FilterList as FilterListIcon,
+  Payment as PaymentIcon,
+  LocalAtm as LocalAtmIcon,
+  AccountBalance as AccountBalanceIcon,
+  CalendarToday as CalendarIcon,
+  History as HistoryIcon,
+  ViewList as ViewListIcon,
+  MoreVert as MoreVertIcon,
+  CloudDownload as CloudDownloadIcon,
+  Print as PrintIcon,
+  Share as ShareIcon,
+  EventNote as EventNoteIcon
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { fetchSales, fetchCustomers, createNotification } from '../api';
 import { useNotification } from '../components/NotificationSnackbar';
 import LoadingSpinner from '../components/LoadingSpinner';
+import commonStyles from '../styles/commonStyles';
 
 function SalesHistoryPage() {
   const theme = useTheme();
@@ -226,35 +245,133 @@ function SalesHistoryPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Sales History</Typography>
-        {isMobile && (
-          <Button
-            startIcon={<FilterListIcon />}
-            onClick={() => setShowFilters(!showFilters)}
-            variant={showFilters ? 'contained' : 'outlined'}
-          >
-            Filters
-          </Button>
-        )}
-      </Box>
+      {/* Page Header with Gradient Background */}
+      <Paper 
+        elevation={0} 
+        sx={{
+          background: theme => theme.palette.mode === 'dark' 
+            ? commonStyles.gradients.secondaryDark
+            : commonStyles.gradients.secondary,
+          p: 3,
+          mb: 4,
+          borderRadius: 2,
+          color: 'white',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        <Box sx={{ 
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: '150px',
+          height: '150px',
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.1)',
+          transform: 'translate(30%, -30%)',
+        }} />
+        
+        <Box sx={{
+          position: 'relative',
+          zIndex: 1,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <Box>
+            <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ textShadow: '0px 2px 3px rgba(0,0,0,0.2)' }}>
+              Sales History
+            </Typography>
+            <Typography variant="subtitle1">
+              View and manage all your transaction records
+            </Typography>
+          </Box>
+          
+          {isMobile && (
+            <Button
+              startIcon={<FilterListIcon />}
+              onClick={() => setShowFilters(!showFilters)}
+              variant={showFilters ? 'contained' : 'outlined'}
+              sx={{
+                bgcolor: showFilters ? 'white' : 'rgba(255,255,255,0.2)',
+                color: showFilters ? 'secondary.main' : 'white',
+                fontWeight: 600,
+                '&:hover': {
+                  bgcolor: showFilters ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)',
+                },
+                boxShadow: theme => commonStyles.customShadows.button(theme.palette.mode === 'dark')
+              }}
+            >
+              Filters {showFilters ? 'On' : 'Off'}
+            </Button>
+          )}
+          
+          {!isMobile && (
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Tooltip title="Download report" arrow>
+                <Button
+                  variant="contained"
+                  startIcon={<CloudDownloadIcon />}
+                  sx={{
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    color: 'white',
+                    '&:hover': {
+                      bgcolor: 'rgba(255,255,255,0.3)',
+                    },
+                  }}
+                >
+                  Export
+                </Button>
+              </Tooltip>
+              <Tooltip title="Print report" arrow>
+                <Button
+                  variant="contained"
+                  startIcon={<PrintIcon />}
+                  sx={{
+                    bgcolor: 'white',
+                    color: 'secondary.main',
+                    '&:hover': {
+                      bgcolor: 'rgba(255,255,255,0.9)',
+                    },
+                  }}
+                >
+                  Print
+                </Button>
+              </Tooltip>
+            </Box>
+          )}
+        </Box>
+      </Paper>
       
       {/* Filters */}
       {showFilters && (
-        <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
-          <Grid container spacing={2} alignItems="center">
+        <Paper elevation={2} sx={{ 
+          p: 3, 
+          mb: 3, 
+          borderRadius: 2,
+          boxShadow: theme => commonStyles.customShadows.card(theme.palette.mode === 'dark')
+        }}>
+          <Grid container spacing={3} alignItems="center">
+            <Grid item xs={12} md={12}>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+                <FilterListIcon sx={{ mr: 1 }} />
+                Filter Sales Records
+              </Typography>
+            </Grid>
+            
             {/* Search */}
             <Grid item xs={12} md={4}>
               <TextField
                 fullWidth
                 label="Search Customer"
+                placeholder="Name or phone number"
                 variant="outlined"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <SearchIcon />
+                      <SearchIcon color="primary" />
                     </InputAdornment>
                   ),
                   endAdornment: searchTerm ? (
@@ -262,11 +379,26 @@ function SalesHistoryPage() {
                       <IconButton
                         size="small"
                         onClick={() => setSearchTerm('')}
+                        sx={{ 
+                          bgcolor: theme => theme.palette.mode === 'dark' 
+                            ? 'rgba(255,255,255,0.05)' 
+                            : 'rgba(0,0,0,0.05)',
+                          '&:hover': {
+                            bgcolor: theme => theme.palette.mode === 'dark' 
+                              ? 'rgba(255,255,255,0.1)' 
+                              : 'rgba(0,0,0,0.1)',
+                          }
+                        }}
                       >
-                        <ClearIcon />
+                        <ClearIcon fontSize="small" />
                       </IconButton>
                     </InputAdornment>
                   ) : null,
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 1.5
+                  }
                 }}
               />
             </Grid>
@@ -280,8 +412,29 @@ function SalesHistoryPage() {
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   label="Status"
+                  sx={{
+                    borderRadius: 1.5,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme => theme.palette.mode === 'dark' 
+                        ? 'rgba(255,255,255,0.15)' 
+                        : 'rgba(0,0,0,0.1)'
+                    }
+                  }}
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <PaymentIcon 
+                        color={
+                          statusFilter === 'Paid' 
+                            ? 'success' 
+                            : statusFilter === 'Pending' 
+                              ? 'warning' 
+                              : 'action'
+                        } 
+                      />
+                    </InputAdornment>
+                  }
                 >
-                  <MenuItem value="all">All</MenuItem>
+                  <MenuItem value="all">All Statuses</MenuItem>
                   <MenuItem value="Paid">Paid</MenuItem>
                   <MenuItem value="Pending">Pending</MenuItem>
                 </Select>
@@ -295,7 +448,22 @@ function SalesHistoryPage() {
                 value={startDate}
                 onChange={(newValue) => setStartDate(newValue)}
                 slotProps={{
-                  textField: { variant: 'outlined', fullWidth: true }
+                  textField: { 
+                    variant: 'outlined', 
+                    fullWidth: true,
+                    InputProps: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CalendarIcon color="action" />
+                        </InputAdornment>
+                      )
+                    },
+                    sx: {
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 1.5
+                      }
+                    }
+                  }
                 }}
               />
             </Grid>
@@ -306,7 +474,22 @@ function SalesHistoryPage() {
                 value={endDate}
                 onChange={(newValue) => setEndDate(newValue)}
                 slotProps={{
-                  textField: { variant: 'outlined', fullWidth: true }
+                  textField: { 
+                    variant: 'outlined', 
+                    fullWidth: true,
+                    InputProps: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CalendarIcon color="action" />
+                        </InputAdornment>
+                      )
+                    },
+                    sx: {
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 1.5
+                      }
+                    }
+                  }
                 }}
               />
             </Grid>
@@ -318,6 +501,19 @@ function SalesHistoryPage() {
                 fullWidth
                 onClick={handleResetFilters}
                 disabled={!searchTerm && statusFilter === 'all' && !startDate && !endDate}
+                startIcon={<ClearIcon />}
+                sx={{
+                  borderRadius: 1.5,
+                  height: '56px',
+                  borderColor: theme => theme.palette.mode === 'dark' 
+                    ? 'rgba(255,255,255,0.15)' 
+                    : 'rgba(0,0,0,0.1)',
+                  '&.Mui-disabled': {
+                    borderColor: theme => theme.palette.mode === 'dark' 
+                      ? 'rgba(255,255,255,0.05)' 
+                      : 'rgba(0,0,0,0.05)'
+                  }
+                }}
               >
                 Clear Filters
               </Button>
@@ -326,11 +522,49 @@ function SalesHistoryPage() {
         </Paper>
       )}
       
-      {/* Results Count */}
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" color="text.secondary">
-          {filteredSales.length} results found
-        </Typography>
+      {/* Results Summary */}
+      <Box sx={{ 
+        mb: 2, 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: 1
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <HistoryIcon sx={{ mr: 1, color: 'text.secondary' }} />
+          <Typography variant="body2" color="text.secondary">
+            {filteredSales.length} transactions found
+          </Typography>
+        </Box>
+        
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Chip 
+            icon={<ViewListIcon sx={{ fontSize: '1rem' }} />} 
+            label="Newest first" 
+            size="small"
+            color="primary"
+            variant="outlined"
+            sx={{
+              borderRadius: 1.5,
+              borderColor: theme => theme.palette.mode === 'dark' 
+                ? 'rgba(255,255,255,0.15)' 
+                : 'rgba(0,0,0,0.1)'
+            }}
+          />
+          
+          {(searchTerm || statusFilter !== 'all' || startDate || endDate) && (
+            <Chip 
+              label="Filters applied" 
+              size="small"
+              color="secondary"
+              onDelete={handleResetFilters}
+              sx={{
+                borderRadius: 1.5
+              }}
+            />
+          )}
+        </Box>
       </Box>
       
       {/* Sales Data */}
@@ -340,118 +574,182 @@ function SalesHistoryPage() {
         <>
           {!isMobile ? (
             /* Table View for Desktop */
-            <Paper elevation={2}>
+            <Paper 
+              elevation={2} 
+              sx={{ 
+                borderRadius: 2, 
+                overflow: 'hidden',
+                boxShadow: theme => commonStyles.customShadows.card(theme.palette.mode === 'dark')
+              }}
+            >
               <TableContainer>
                 <Table>
                   <TableHead>
-                    <TableRow>
-                      <TableCell>Customer</TableCell>
-                      <TableCell>Date</TableCell>
-                      <TableCell>Amount</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell align="right">Actions</TableCell>
+                    <TableRow sx={{ 
+                      bgcolor: theme => theme.palette.mode === 'dark' 
+                        ? 'rgba(255,255,255,0.05)' 
+                        : 'rgba(0,0,0,0.02)' 
+                    }}>
+                      <TableCell width="30%">
+                        <Typography variant="subtitle2" fontWeight={600}>Customer</Typography>
+                      </TableCell>
+                      <TableCell width="20%">
+                        <Typography variant="subtitle2" fontWeight={600}>Date</Typography>
+                      </TableCell>
+                      <TableCell width="20%">
+                        <Typography variant="subtitle2" fontWeight={600}>Amount</Typography>
+                      </TableCell>
+                      <TableCell width="15%">
+                        <Typography variant="subtitle2" fontWeight={600}>Status</Typography>
+                      </TableCell>
+                      <TableCell align="right" width="15%">
+                        <Typography variant="subtitle2" fontWeight={600}>Actions</Typography>
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {paginatedSales.length > 0 ? (
                       paginatedSales.map((sale) => (
-                        <TableRow key={sale._id} hover>
-                          <TableCell>{sale.customerName}</TableCell>
-                          <TableCell>{formatDate(sale.date)}</TableCell>
-                          <TableCell>{formatCurrency(sale.amount)}</TableCell>
+                        <TableRow 
+                          key={sale._id} 
+                          hover
+                          sx={{ 
+                            cursor: 'pointer',
+                            '&:hover': {
+                              bgcolor: theme => theme.palette.mode === 'dark' 
+                                ? 'rgba(255,255,255,0.05)' 
+                                : 'rgba(0,0,0,0.02)'
+                            }
+                          }}
+                          onClick={() => handleViewReceipt(sale)}
+                        >
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Avatar 
+                                sx={{ 
+                                  width: 32, 
+                                  height: 32, 
+                                  mr: 2,
+                                  fontSize: '0.9rem',
+                                  bgcolor: theme => theme.palette.secondary.main,
+                                }}
+                              >
+                                {sale.customerName.charAt(0)}
+                              </Avatar>
+                              <Box>
+                                <Typography fontWeight={500}>
+                                  {sale.customerName}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {sale.customerPhone}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </TableCell>
+                          
+                          <TableCell>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <CalendarIcon sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                              <Typography>{formatDate(sale.date)}</Typography>
+                            </Box>
+                          </TableCell>
+                          
+                          <TableCell>
+                            <Typography fontWeight={600} color="primary.main">
+                              {formatCurrency(sale.amount)}
+                            </Typography>
+                          </TableCell>
+                          
                           <TableCell>
                             <Chip
                               label={sale.status}
                               color={sale.status === 'Pending' ? 'warning' : 'success'}
                               size="small"
+                              variant="filled"
+                              sx={{
+                                ...commonStyles.statusChip,
+                                fontWeight: 600,
+                                px: 1
+                              }}
                             />
                           </TableCell>
+                          
                           <TableCell align="right">
-                            <IconButton
-                              color="primary"
-                              onClick={() => handleViewReceipt(sale)}
-                            >
-                              <ReceiptIcon />
-                            </IconButton>
+                            <Tooltip title="View receipt details" arrow>
+                              <IconButton
+                                color="primary"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewReceipt(sale);
+                                }}
+                                size="small"
+                                sx={{ 
+                                  bgcolor: theme => theme.palette.mode === 'dark' 
+                                    ? 'rgba(25, 118, 210, 0.12)' 
+                                    : 'rgba(25, 118, 210, 0.08)',
+                                  mr: 1
+                                }}
+                              >
+                                <ReceiptIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                            
+                            <Tooltip title="Send receipt via WhatsApp" arrow>
+                              <IconButton
+                                color="success"
+                                size="small"
+                                sx={{ 
+                                  bgcolor: theme => theme.palette.mode === 'dark' 
+                                    ? 'rgba(46, 125, 50, 0.12)' 
+                                    : 'rgba(46, 125, 50, 0.08)'
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedSale(sale);
+                                  handleSendReceipt();
+                                }}
+                              >
+                                <WhatsAppIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
                           </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={5} align="center">
-                          No sales found matching the filters
+                        <TableCell colSpan={5} align="center" sx={{ py: 5 }}>
+                          <Box sx={{ textAlign: 'center' }}>
+                            <ReceiptIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
+                            <Typography variant="h6" color="text.secondary" gutterBottom>
+                              No sales records found
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                              Try adjusting your filters or search criteria
+                            </Typography>
+                            <Button
+                              variant="outlined"
+                              onClick={handleResetFilters}
+                              disabled={!searchTerm && statusFilter === 'all' && !startDate && !endDate}
+                            >
+                              Clear All Filters
+                            </Button>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     )}
                   </TableBody>
                 </Table>
               </TableContainer>
-              <TablePagination
-                component="div"
-                count={filteredSales.length}
-                page={page}
-                onPageChange={handleChangePage}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </Paper>
-          ) : (
-            /* Card View for Mobile */
-            <Box>
-              {paginatedSales.length > 0 ? (
-                paginatedSales.map((sale) => (
-                  <Card key={sale._id} sx={{ mb: 2 }}>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="subtitle1">
-                          {sale.customerName}
-                        </Typography>
-                        <Chip
-                          label={sale.status}
-                          color={sale.status === 'Pending' ? 'warning' : 'success'}
-                          size="small"
-                        />
-                      </Box>
-                      
-                      <Grid container spacing={1}>
-                        <Grid item xs={6}>
-                          <Typography variant="body2" color="text.secondary">
-                            Amount
-                          </Typography>
-                          <Typography variant="body1" fontWeight="medium">
-                            {formatCurrency(sale.amount)}
-                          </Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Typography variant="body2" color="text.secondary">
-                            Date
-                          </Typography>
-                          <Typography variant="body2">
-                            {formatDate(sale.date)}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                      
-                      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                        <Button
-                          startIcon={<ReceiptIcon />}
-                          onClick={() => handleViewReceipt(sale)}
-                          size="small"
-                        >
-                          View Receipt
-                        </Button>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <Paper sx={{ p: 3, textAlign: 'center' }}>
-                  <Typography>No sales found matching the filters</Typography>
-                </Paper>
-              )}
-              
-              {/* Mobile Pagination */}
-              <Box sx={{ mt: 2 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                px: 2,
+                borderTop: theme => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+              }}>
+                <Typography variant="caption" color="text.secondary">
+                  Showing {Math.min(paginatedSales.length, rowsPerPage)} of {filteredSales.length} records
+                </Typography>
                 <TablePagination
                   component="div"
                   count={filteredSales.length}
@@ -459,8 +757,183 @@ function SalesHistoryPage() {
                   onPageChange={handleChangePage}
                   rowsPerPage={rowsPerPage}
                   onRowsPerPageChange={handleChangeRowsPerPage}
+                  sx={{
+                    '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
+                      fontSize: '0.875rem'
+                    }
+                  }}
                 />
               </Box>
+            </Paper>
+          ) : (
+            /* Card View for Mobile */
+            <Box>
+              {paginatedSales.length > 0 ? (
+                paginatedSales.map((sale) => (
+                  <Card 
+                    key={sale._id} 
+                    sx={{ 
+                      mb: 2,
+                      borderRadius: 2,
+                      overflow: 'hidden',
+                      boxShadow: theme => commonStyles.customShadows.card(theme.palette.mode === 'dark'),
+                      ...commonStyles.cardWithHover
+                    }}
+                    onClick={() => handleViewReceipt(sale)}
+                    elevation={2}
+                  >
+                    <Box sx={{ 
+                      height: 6, 
+                      bgcolor: sale.status === 'Pending' 
+                        ? theme => theme.palette.warning.main
+                        : theme => theme.palette.success.main
+                    }} />
+                    <CardContent sx={{ p: 2 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5, alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Avatar 
+                            sx={{ 
+                              width: 36, 
+                              height: 36, 
+                              mr: 1.5,
+                              fontSize: '0.9rem',
+                              bgcolor: theme => theme.palette.secondary.main,
+                            }}
+                          >
+                            {sale.customerName.charAt(0)}
+                          </Avatar>
+                          <Typography variant="subtitle1" fontWeight={600}>
+                            {sale.customerName}
+                          </Typography>
+                        </Box>
+                        <Chip
+                          label={sale.status}
+                          color={sale.status === 'Pending' ? 'warning' : 'success'}
+                          size="small"
+                          variant="filled"
+                          sx={{
+                            ...commonStyles.statusChip,
+                            fontWeight: 600,
+                          }}
+                        />
+                      </Box>
+                      
+                      <Divider sx={{ mb: 1.5 }} />
+                      
+                      <Grid container spacing={2}>
+                        <Grid item xs={6}>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Amount
+                          </Typography>
+                          <Typography variant="h6" fontWeight={600} color="primary.main">
+                            {formatCurrency(sale.amount)}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Date
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <CalendarIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
+                            <Typography variant="body2">
+                              {formatDate(sale.date)}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </CardContent>
+                    <Divider />
+                    <Box 
+                      sx={{ 
+                        px: 2, 
+                        py: 1, 
+                        display: 'flex', 
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        bgcolor: theme => theme.palette.mode === 'dark' 
+                          ? 'rgba(255,255,255,0.01)' 
+                          : 'rgba(0,0,0,0.01)'
+                      }}
+                    >
+                      <Button
+                        startIcon={<ReceiptIcon />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewReceipt(sale);
+                        }}
+                        size="small"
+                        color="primary"
+                      >
+                        View
+                      </Button>
+                      <IconButton
+                        color="success"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedSale(sale);
+                          handleSendReceipt();
+                        }}
+                        sx={{ 
+                          bgcolor: theme => theme.palette.mode === 'dark' 
+                            ? 'rgba(46, 125, 50, 0.12)' 
+                            : 'rgba(46, 125, 50, 0.08)'
+                        }}
+                      >
+                        <WhatsAppIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  </Card>
+                ))
+              ) : (
+                <Paper sx={{ 
+                  p: 4, 
+                  textAlign: 'center',
+                  borderRadius: 2,
+                  boxShadow: theme => commonStyles.customShadows.card(theme.palette.mode === 'dark') 
+                }}>
+                  <ReceiptIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary" gutterBottom>
+                    No sales records found
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Try adjusting your filters or search criteria
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    onClick={handleResetFilters}
+                    disabled={!searchTerm && statusFilter === 'all' && !startDate && !endDate}
+                  >
+                    Clear All Filters
+                  </Button>
+                </Paper>
+              )}
+              
+              {/* Mobile Pagination */}
+              {paginatedSales.length > 0 && (
+                <Box sx={{ 
+                  mt: 2,
+                  backgroundColor: theme => theme.palette.mode === 'dark' 
+                    ? 'rgba(255,255,255,0.05)' 
+                    : 'rgba(0,0,0,0.02)',
+                  borderRadius: 2,
+                  border: theme => `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                }}>
+                  <TablePagination
+                    component="div"
+                    count={filteredSales.length}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    sx={{
+                      '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
+                        fontSize: '0.75rem'
+                      }
+                    }}
+                  />
+                </Box>
+              )}
             </Box>
           )}
         </>
@@ -472,69 +945,197 @@ function SalesHistoryPage() {
         onClose={() => setOpenReceiptDialog(false)}
         maxWidth="sm"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: theme => commonStyles.customShadows.dialog(theme.palette.mode === 'dark'),
+            overflow: 'hidden'
+          }
+        }}
       >
-        <DialogTitle>Sale Receipt</DialogTitle>
-        <DialogContent>
-          {selectedSale && (
-            <Box sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                {formatCurrency(selectedSale.amount)}
-              </Typography>
+        {selectedSale && (
+          <>
+            <Box sx={{ 
+              background: theme => selectedSale.status === 'Paid' 
+                ? (theme.palette.mode === 'dark' ? commonStyles.gradients.successDark : commonStyles.gradients.success)
+                : (theme.palette.mode === 'dark' ? commonStyles.gradients.warningDark : commonStyles.gradients.warning),
+              p: 2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              color: 'white'
+            }}>
+              <Avatar sx={{ 
+                bgcolor: 'rgba(255,255,255,0.2)', 
+                width: 48, 
+                height: 48 
+              }}>
+                <ReceiptIcon />
+              </Avatar>
               
-              <Grid container spacing={2} sx={{ mb: 2 }}>
-                <Grid item xs={6}>
-                  <Typography variant="body2" color="text.secondary">
-                    Date
-                  </Typography>
-                  <Typography variant="body1">
-                    {formatDate(selectedSale.date)}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography variant="body2" color="text.secondary">
-                    Status
-                  </Typography>
-                  <Chip
-                    label={selectedSale.status}
-                    color={selectedSale.status === 'Pending' ? 'warning' : 'success'}
-                    size="small"
-                  />
+              <Box>
+                <DialogTitle sx={{ p: 0, color: 'inherit', fontWeight: 600 }}>
+                  Sale Receipt
+                </DialogTitle>
+                <Typography variant="body2">
+                  Transaction ID: #{selectedSale._id?.substring(0, 8) || 'N/A'}
+                </Typography>
+              </Box>
+            </Box>
+            
+            <DialogContent sx={{ px: 3, py: 4 }}>
+              <Paper 
+                elevation={0}
+                sx={{ 
+                  p: 3, 
+                  border: theme => `1px dashed ${
+                    theme.palette.mode === 'dark' 
+                      ? 'rgba(255,255,255,0.2)' 
+                      : 'rgba(0,0,0,0.1)'
+                  }`,
+                  borderRadius: 1.5,
+                  mb: 3,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                }}
+              >
+                <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontWeight: 500 }}>
+                  AMOUNT
+                </Typography>
+                <Typography variant="h4" fontWeight="bold" color="primary.main" gutterBottom>
+                  {formatCurrency(selectedSale.amount)}
+                </Typography>
+                
+                <Chip
+                  label={selectedSale.status}
+                  color={selectedSale.status === 'Pending' ? 'warning' : 'success'}
+                  sx={{
+                    ...commonStyles.statusChip,
+                    fontWeight: 600,
+                    mt: 1
+                  }}
+                />
+              </Paper>
+              
+              <Grid container spacing={3} sx={{ mb: 2 }}>
+                <Grid item xs={12}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                    <Avatar sx={{ 
+                      width: 32, 
+                      height: 32, 
+                      mr: 1.5,
+                      bgcolor: theme => theme.palette.secondary.main
+                    }}>
+                      {selectedSale.customerName?.charAt(0) || 'C'}
+                    </Avatar>
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      {selectedSale.customerName}
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', ml: 0.5 }}>
+                    <WhatsAppIcon sx={{ fontSize: 16, mr: 1, color: '#25D366' }} />
+                    <Typography variant="body2" color="text.secondary">
+                      {selectedSale.customerPhone}
+                    </Typography>
+                  </Box>
                 </Grid>
                 
-                <Grid item xs={12}>
-                  <Typography variant="body2" color="text.secondary">
-                    Customer
+                <Grid item xs={6}>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Transaction Date
                   </Typography>
-                  <Typography variant="body1">
-                    {selectedSale.customerName} ({selectedSale.customerPhone})
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <CalendarIcon sx={{ fontSize: 18, mr: 1, color: 'text.secondary' }} />
+                    <Typography variant="body1" fontWeight={500}>
+                      {formatDate(selectedSale.date)}
+                    </Typography>
+                  </Box>
+                </Grid>
+                
+                <Grid item xs={6}>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Payment Method
                   </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <LocalAtmIcon sx={{ fontSize: 18, mr: 1, color: 'text.secondary' }} />
+                    <Typography variant="body1" fontWeight={500}>
+                      Cash
+                    </Typography>
+                  </Box>
                 </Grid>
                 
                 {selectedSale.notes && (
                   <Grid item xs={12}>
-                    <Typography variant="body2" color="text.secondary">
-                      Notes
-                    </Typography>
-                    <Typography variant="body1">
-                      {selectedSale.notes}
-                    </Typography>
+                    <Paper
+                      variant="outlined"
+                      sx={{ 
+                        p: 2, 
+                        borderRadius: 1.5,
+                        borderStyle: 'dashed',
+                        bgcolor: theme => theme.palette.mode === 'dark' 
+                          ? 'rgba(255,255,255,0.02)' 
+                          : 'rgba(0,0,0,0.02)',
+                      }}
+                    >
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        <EventNoteIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'text-bottom' }} />
+                        Notes
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedSale.notes}
+                      </Typography>
+                    </Paper>
                   </Grid>
                 )}
               </Grid>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenReceiptDialog(false)}>Close</Button>
-          <Button
-            startIcon={<WhatsAppIcon />}
-            variant="contained"
-            color="success"
-            onClick={handleSendReceipt}
-          >
-            Send Receipt
-          </Button>
-        </DialogActions>
+            </DialogContent>
+            
+            <Divider />
+            
+            <DialogActions sx={{ px: 3, py: 2 }}>
+              <Button 
+                onClick={() => setOpenReceiptDialog(false)}
+                variant="outlined"
+                sx={{ 
+                  borderRadius: 1.5,
+                  textTransform: 'none',
+                }}
+              >
+                Close
+              </Button>
+              
+              <Button
+                startIcon={<ShareIcon />}
+                variant="outlined"
+                color="info"
+                sx={{ 
+                  borderRadius: 1.5,
+                  textTransform: 'none',
+                  mr: 1
+                }}
+              >
+                Share
+              </Button>
+              
+              <Button
+                startIcon={<WhatsAppIcon />}
+                variant="contained"
+                color="success"
+                onClick={handleSendReceipt}
+                disableElevation
+                sx={{ 
+                  borderRadius: 1.5,
+                  textTransform: 'none',
+                  px: 3
+                }}
+              >
+                Send Receipt
+              </Button>
+            </DialogActions>
+          </>
+        )}
       </Dialog>
     </Box>
   );
