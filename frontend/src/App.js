@@ -10,6 +10,7 @@ import { Box, Toolbar } from '@mui/material';
 
 // Import theme provider
 import { AppThemeProvider } from './contexts/ThemeContext';
+import { AuthProvider } from './contexts/AuthContext';
 
 // Import pages
 import LoginPage from './pages/LoginPage';
@@ -29,6 +30,7 @@ import { NotificationProvider } from './components/NotificationSnackbar';
 
 // PrivateRoute component for protected routes
 const PrivateRoute = ({ children }) => {
+  // We'll still check localStorage.getItem as a fallback, but the AuthContext is preferred
   const isAuthenticated = localStorage.getItem('token') !== null;
   const location = useLocation();
 
@@ -51,50 +53,15 @@ const PrivateRoute = ({ children }) => {
 };
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
-  // Check if user is authenticated on load
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  // Handle login
-  const handleLogin = (token) => {
-    localStorage.setItem('token', token);
-    setIsAuthenticated(true);
-  };
-
-  // Handle logout
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsAuthenticated(false);
-  };
-
   return (
     <AppThemeProvider>
       <NotificationProvider>
-        <Router>
-          <Routes>
-            {/* Public routes */}
-            <Route 
-              path="/" 
-              element={
-                isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <LoginPage onLogin={handleLogin} />
-              } 
-            />
-            <Route 
-              path="/signup" 
-              element={
-                isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <SignupPage onSignup={handleLogin} />
-              } 
-            />
+        <AuthProvider>
+          <Router>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<LoginPage />} />
+              <Route path="/signup" element={<SignupPage />} />
             
             {/* Protected routes */}
             <Route
@@ -141,7 +108,7 @@ function App() {
               path="/profile"
               element={
                 <PrivateRoute>
-                  <ProfilePage onLogout={handleLogout} />
+                  <ProfilePage />
                 </PrivateRoute>
               }
             />
@@ -158,6 +125,7 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Router>
+        </AuthProvider>
       </NotificationProvider>
     </AppThemeProvider>
   );

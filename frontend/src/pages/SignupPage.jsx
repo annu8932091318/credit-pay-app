@@ -27,12 +27,14 @@ import {
   Phone as PhoneIcon 
 } from '@mui/icons-material';
 import { useThemeContext } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import ThemeToggle from '../components/ThemeToggle/ThemeToggle';
 
 const SignupPage = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const { isDarkMode } = useThemeContext();
+  const { register } = useAuth();
   
   // Form state
   const [formData, setFormData] = useState({
@@ -88,16 +90,19 @@ const SignupPage = () => {
     }
     
     setLoading(true);
+    setError(null);
     
     try {
-      // Simulating API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Mock successful registration
-      localStorage.setItem('token', 'mock-token');
+      await register(formData);
       navigate('/dashboard');
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      console.error('Registration failed:', err);
+      if (err.errors && Array.isArray(err.errors)) {
+        // Handle validation errors from express-validator
+        setError(err.errors.map(e => e.msg).join(', '));
+      } else {
+        setError(err.error || err.message || 'Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

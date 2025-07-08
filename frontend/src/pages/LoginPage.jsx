@@ -10,16 +10,30 @@ import {
   InputAdornment,
   Link,
   CircularProgress,
+  Tabs,
+  Tab,
+  IconButton,
 } from '@mui/material';
-import { Phone as PhoneIcon } from '@mui/icons-material';
+import { 
+  Phone as PhoneIcon, 
+  Email as EmailIcon,
+  Visibility,
+  VisibilityOff 
+} from '@mui/icons-material';
 import { useNotification } from '../components/NotificationSnackbar';
+import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 function LoginPage() {
   const navigate = useNavigate();
   const { showNotification } = useNotification();
+  const { login } = useAuth();
   
   // States
+  const [tabValue, setTabValue] = useState(0); // 0 = email/password, 1 = OTP
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [showOtpForm, setShowOtpForm] = useState(false);
@@ -30,8 +44,38 @@ function LoginPage() {
   // Ref for the first OTP input field
   const firstOtpInputRef = useRef(null);
 
+  // Email validation
+  const isEmailValid = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
   // Phone number validation
   const isPhoneValid = (phone) => /^[0-9]{10}$/.test(phone);
+
+  // Handle email/password login
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    
+    if (!isEmailValid(email)) {
+      showNotification('Please enter a valid email address', 'error');
+      return;
+    }
+    
+    if (!password) {
+      showNotification('Please enter your password', 'error');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      await login({ email, password });
+      showNotification('Login successful!', 'success');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Login failed:', error);
+      showNotification(error.error || 'Login failed. Please check your credentials.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handle phone number input
   const handlePhoneChange = (e) => {
@@ -273,39 +317,80 @@ function LoginPage() {
             Shopkeeper Login Portal
           </Typography>
           
-          {!showOtpForm ? (
-            /* Phone Number Form */
-            <Box component="form" onSubmit={handleSubmitPhone} sx={{ mt: 1, width: '100%', maxWidth: '360px' }}>
+          <Tabs
+            value={tabValue}
+            onChange={(e, newValue) => setTabValue(newValue)}
+            sx={{ width: '100%', mb: 3 }}
+            textColor="primary"
+            indicatorColor="primary"
+          >
+            <Tab label="Email / Password" sx={{ flex: 1 }} />
+            <Tab label="OTP Login" sx={{ flex: 1 }} />
+          </Tabs>
+          
+          {/* Email/Password Login Form */}
+          {tabValue === 0 ? (
+            <Box component="form" onSubmit={handleEmailLogin} sx={{ width: '100%', maxWidth: '360px' }}>
               <TextField
                 margin="normal"
                 required
                 fullWidth
-                id="phone"
-                label="Mobile Number"
-                name="phone"
-                autoComplete="tel"
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
                 autoFocus
-                value={phoneNumber}
-                onChange={handlePhoneChange}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PhoneIcon color="primary" />
+                      <EmailIcon color="primary" />
                     </InputAdornment>
                   ),
-                }}
-                inputProps={{
-                  maxLength: 10,
-                  inputMode: 'numeric',
-                  pattern: '[0-9]*',
-                  style: { fontSize: '1.1rem' }
                 }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 2,
                   }
                 }}
-                helperText="Enter your registered 10-digit mobile number"
+                helperText="Enter your registered email address"
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <VisibilityOff color="primary" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        size="small"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                  }
+                }}
+                helperText="Enter your password"
               />
               <Button
                 type="submit"
@@ -322,133 +407,213 @@ function LoginPage() {
                     ? '0 4px 15px rgba(144, 202, 249, 0.2)'
                     : '0 4px 15px rgba(15, 76, 129, 0.2)',
                 }}
-                disabled={loading || !phoneNumber || !isPhoneValid(phoneNumber)}
+                disabled={loading || !email || !password}
               >
-                {loading ? <CircularProgress size={26} /> : 'Send Verification Code'}
+                {loading ? <CircularProgress size={26} /> : 'Login'}
               </Button>
-              
-              <Typography
-                variant="body2"
-                align="center"
-                sx={{ 
-                  mt: 3,
-                  color: 'text.secondary',
-                  fontStyle: 'italic'
-                }}
-              >
-                New to Credit Pay? Contact your administrator
-              </Typography>
-            </Box>
-          ) : (
-            /* OTP Verification Form */
-            <Box component="form" onSubmit={handleVerifyOtp} sx={{ mt: 2, width: '100%', maxWidth: '380px' }}>
-              <Typography 
-                variant="h6" 
-                align="center" 
-                sx={{ 
-                  mb: 1,
-                  fontWeight: 500
-                }}
-              >
-                Verification Code
-              </Typography>
-              
-              <Typography 
-                variant="body2" 
-                align="center" 
-                sx={{ 
-                  mb: 3,
-                  color: 'text.secondary'
-                }}
-              >
-                Enter the 6-digit code sent to <b>{phoneNumber}</b>
-              </Typography>
-              
-              {/* OTP Input Fields */}
-              <Box 
-                sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  gap: 1,
-                  mb: 3
-                }}
-              >
-                {otp.map((digit, index) => (
-                  <TextField
-                    key={index}
-                    id={`otp-input-${index}`}
-                    value={digit}
-                    onChange={(e) => handleOtpChange(index, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(e, index)}
-                    inputRef={index === 0 ? firstOtpInputRef : null}
-                    inputProps={{
-                      maxLength: 1,
-                      inputMode: 'numeric',
-                      pattern: '[0-9]*',
-                      autoComplete: 'one-time-code',
-                      style: { 
-                        textAlign: 'center',
-                        fontSize: '1.2rem',
-                        fontWeight: 600
-                      },
-                    }}
-                    variant="outlined"
-                    sx={{ 
-                      width: '40px',
-                      '& .MuiOutlinedInput-root': {
-                        '&:hover fieldset': {
-                          borderColor: 'primary.main',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderWidth: '2px',
-                        }
-                      }
-                    }}
-                  />
-                ))}
-              </Box>
-              
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3 }}
-                disabled={loading || otp.join('').length !== 6}
-              >
-                {loading ? <CircularProgress size={24} /> : 'Verify OTP'}
-              </Button>
-              
-              <Box sx={{ mt: 2, textAlign: 'center' }}>
-                {canResend ? (
-                  <Link
-                    component="button"
-                    variant="body2"
-                    onClick={handleResendOtp}
-                    underline="hover"
-                  >
-                    Resend OTP
-                  </Link>
-                ) : (
-                  <Typography variant="body2" color="text.secondary">
-                    Resend OTP in {timer} seconds
-                  </Typography>
-                )}
-              </Box>
               
               <Box sx={{ mt: 2, textAlign: 'center' }}>
                 <Link
                   component="button"
                   variant="body2"
-                  onClick={() => setShowOtpForm(false)}
+                  onClick={() => setTabValue(1)}
                   underline="hover"
                 >
-                  Change Phone Number
+                  Use OTP instead
                 </Link>
               </Box>
             </Box>
+          ) : (
+            /* OTP Login Section */
+            <Box sx={{ width: '100%', maxWidth: '360px' }}>
+              {!showOtpForm ? (
+                /* Phone Number Input */
+                <Box component="form" onSubmit={handleSubmitPhone}>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="phone"
+                    label="Mobile Number"
+                    name="phone"
+                    autoComplete="tel"
+                    autoFocus
+                    value={phoneNumber}
+                    onChange={handlePhoneChange}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PhoneIcon color="primary" />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                      }
+                    }}
+                    helperText="Enter your 10-digit mobile number"
+                  />
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{ 
+                      mt: 4,
+                      mb: 2,
+                      py: 1.5,
+                      borderRadius: 2,
+                      fontWeight: 600,
+                      fontSize: '1rem',
+                      boxShadow: theme => theme.palette.mode === 'dark'
+                        ? '0 4px 15px rgba(144, 202, 249, 0.2)'
+                        : '0 4px 15px rgba(15, 76, 129, 0.2)',
+                    }}
+                    disabled={loading || !isPhoneValid(phoneNumber)}
+                  >
+                    {loading ? <CircularProgress size={26} /> : 'Send OTP'}
+                  </Button>
+                  
+                  <Box sx={{ mt: 2, textAlign: 'center' }}>
+                    <Link
+                      component="button"
+                      variant="body2"
+                      onClick={() => setTabValue(0)}
+                      underline="hover"
+                    >
+                      Use Email/Password instead
+                    </Link>
+                  </Box>
+                </Box>
+              ) : (
+                /* OTP Verification Form */
+                <Box component="form" onSubmit={handleVerifyOtp} sx={{ mt: 2 }}>
+                  <Typography 
+                    variant="h6" 
+                    align="center" 
+                    sx={{ 
+                      mb: 1,
+                      fontWeight: 500
+                    }}
+                  >
+                    Verification Code
+                  </Typography>
+                  
+                  <Typography 
+                    variant="body2" 
+                    align="center" 
+                    sx={{ 
+                      mb: 3,
+                      color: 'text.secondary'
+                    }}
+                  >
+                    Enter the 6-digit code sent to <b>{phoneNumber}</b>
+                  </Typography>
+                  
+                  {/* OTP Input Fields */}
+                  <Box 
+                    sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'center', 
+                      gap: 1,
+                      mb: 3
+                    }}
+                  >
+                    {otp.map((digit, index) => (
+                      <TextField
+                        key={index}
+                        id={`otp-input-${index}`}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                        onKeyDown={(e) => handleKeyDown(e, index)}
+                        inputRef={index === 0 ? firstOtpInputRef : null}
+                        inputProps={{
+                          maxLength: 1,
+                          inputMode: 'numeric',
+                          pattern: '[0-9]*',
+                          autoComplete: 'one-time-code',
+                          style: { 
+                            textAlign: 'center',
+                            fontSize: '1.2rem',
+                            fontWeight: 600
+                          },
+                        }}
+                        variant="outlined"
+                        sx={{ 
+                          width: '40px',
+                          '& .MuiOutlinedInput-root': {
+                            '&:hover fieldset': {
+                              borderColor: 'primary.main',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderWidth: '2px',
+                            }
+                          }
+                        }}
+                      />
+                    ))}
+                  </Box>
+                  
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{ mt: 3 }}
+                    disabled={loading || otp.join('').length !== 6}
+                  >
+                    {loading ? <CircularProgress size={26} /> : 'Verify & Login'}
+                  </Button>
+                  
+                  <Box sx={{ mt: 2, textAlign: 'center' }}>
+                    {canResend ? (
+                      <Link
+                        component="button"
+                        variant="body2"
+                        onClick={handleResendOtp}
+                        underline="hover"
+                        disabled={loading}
+                      >
+                        Resend OTP
+                      </Link>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        Resend OTP in {timer}s
+                      </Typography>
+                    )}
+                  </Box>
+                  
+                  <Box sx={{ mt: 2, textAlign: 'center' }}>
+                    <Link
+                      component="button"
+                      variant="body2"
+                      onClick={() => setShowOtpForm(false)}
+                      underline="hover"
+                    >
+                      Change mobile number
+                    </Link>
+                  </Box>
+                </Box>
+              )}
+            </Box>
           )}
           
-          {!showOtpForm && (
+          {!showOtpForm && tabValue === 1 && (
+            <Box sx={{ mt: 3, textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                Don't have an account?{' '}
+                <Link 
+                  component="a" 
+                  href="/signup" 
+                  variant="body2" 
+                  sx={{ fontWeight: 600 }}
+                >
+                  Sign up now
+                </Link>
+              </Typography>
+            </Box>
+          )}
+          
+          {tabValue === 0 && (
             <Box sx={{ mt: 3, textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
                 Don't have an account?{' '}

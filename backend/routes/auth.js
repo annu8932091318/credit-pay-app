@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/users');
-const logger = require('../modules/logger');
+const { logger } = require('../modules/logger');
 
 const router = express.Router();
 
@@ -25,11 +25,11 @@ router.post('/register', [
   body('email').isEmail().withMessage('Valid email is required'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
   body('phone').notEmpty().withMessage('Phone number is required'),
-  body('role').isIn(['admin', 'user']).withMessage('Invalid role'),
+  body('role').optional().isIn(['admin', 'user']).withMessage('Invalid role'),
   validateRequest
 ], async (req, res) => {
   try {
-    const { name, email, password, phone, role } = req.body;
+    const { name, email, password, phone, role, shopName } = req.body;
 
     // Check if user already exists
     let user = await User.findOne({ email });
@@ -47,7 +47,8 @@ router.post('/register', [
       email,
       password: hashedPassword,
       phone,
-      role
+      shopName: shopName || '',
+      role: role || 'user' // Default to 'user' if role is not provided
     });
 
     await user.save();
@@ -65,6 +66,8 @@ router.post('/register', [
         id: user.id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
+        shopName: user.shopName,
         role: user.role
       }
     });
@@ -111,6 +114,8 @@ router.post('/login', [
         id: user.id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
+        shopName: user.shopName,
         role: user.role
       }
     });

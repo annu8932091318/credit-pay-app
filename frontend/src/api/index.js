@@ -111,10 +111,34 @@ api.interceptors.response.use(
   }
 );
 
-// Authentication
-export const login = (email, password) => api.post('/auth/login', { email, password });
-export const register = (userData) => api.post('/auth/register', userData);
-export const getCurrentUser = () => api.get('/auth/me');
+// --- Authentication ---
+export const registerUser = async (userData) => {
+  try {
+    const response = await api.post('/auth/register', userData);
+    return response.data;
+  } catch (error) {
+    console.error('Registration API Error:', error.response?.data || error);
+    throw error.response?.data || { error: 'Registration failed. Please try again later.' };
+  }
+};
+
+export const loginUser = async (credentials) => {
+  try {
+    const response = await api.post('/auth/login', credentials);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+export const getCurrentUser = async () => {
+  try {
+    const response = await api.get('/auth/me');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+}
 
 // Customers
 export const fetchCustomers = async (noCache = false) => {
@@ -223,4 +247,4 @@ export default api;
 export const fetchShopkeeper = (id) => axios.get(`${API_BASE}/shopkeepers/${id}`);
 export const createShopkeeper = (data) => axios.post(`${API_BASE}/shopkeepers`, data);
 export const updateShopkeeper = (id, data) => axios.put(`${API_BASE}/shopkeepers/${id}`, data);
-export const deleteShopkeeper = (id) => axios.delete(`${API_BASE}/shopkeepers/${id}`); 
+export const deleteShopkeeper = (id) => axios.delete(`${API_BASE}/shopkeepers/${id}`);

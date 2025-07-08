@@ -16,12 +16,18 @@ import {
   DialogActions,
   Grid,
   IconButton,
+  Card,
+  CardContent,
+  Avatar,
+  useTheme,
+  alpha,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,
   WhatsApp as WhatsAppIcon,
   Receipt as ReceiptIcon,
   Share as ShareIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
 
 import { fetchCustomer, fetchSales, createNotification } from '../api';
@@ -32,6 +38,7 @@ function CustomerDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { showNotification } = useNotification();
+  const theme = useTheme();
   
   // States
   const [customer, setCustomer] = useState(null);
@@ -159,8 +166,6 @@ function CustomerDetailPage() {
   if (loading || !customer) {
     return <LoadingSpinner open={true} fullScreen={true} />;
   }
-
-  const theme = useTheme();
 
   return (
     <Box>

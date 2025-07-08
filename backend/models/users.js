@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  shopName: {
+    type: String,
+    required: false
+  },
   role: {
     type: String,
     enum: ['admin', 'user'],

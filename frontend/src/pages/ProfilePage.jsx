@@ -17,7 +17,8 @@ import {
   CardContent,
   Tooltip,
   IconButton,
-  Fade
+  Fade,
+  Chip
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -38,10 +39,12 @@ import {
 import { fetchShopkeeper, updateShopkeeper } from '../api';
 import { useNotification } from '../components/NotificationSnackbar';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useAuth } from '../contexts/AuthContext';
 import commonStyles from '../styles/commonStyles';
 
 function ProfilePage() {
   const { showNotification } = useNotification();
+  const { user, updateUser } = useAuth();
   
   // States
   const [profile, setProfile] = useState({
@@ -59,29 +62,40 @@ function ProfilePage() {
     const loadProfile = async () => {
       setLoading(true);
       try {
-        // Mock shopkeeper ID - in real app would come from auth context
-        const shopkeeperId = '12345';
-        const response = await fetchShopkeeper(shopkeeperId);
-        setProfile(response.data);
+        if (user) {
+          // Use data from authenticated user
+          setProfile({
+            _id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            shopName: user.shopName || '',
+            upiId: user.upiId || '',
+            enableWhatsApp: true,
+          });
+        } else {
+          // Fallback to API call if needed
+          try {
+            const response = await fetchShopkeeper(user?.id);
+            setProfile({
+              ...response.data,
+              name: user?.name || response.data.name,
+              email: user?.email || response.data.email,
+            });
+          } catch (error) {
+            console.error('Failed to load additional profile data:', error);
+          }
+        }
       } catch (error) {
         console.error('Failed to load profile:', error);
         showNotification('Failed to load profile data', 'error');
-        
-        // Set default data for demo
-        setProfile({
-          _id: '12345',
-          shopName: 'My Shop',
-          phone: '9876543210',
-          upiId: 'myshop@upi',
-          enableWhatsApp: true,
-        });
       } finally {
         setLoading(false);
       }
     };
     
     loadProfile();
-  }, [showNotification]);
+  }, [user, showNotification]);
   
   // Handle input changes
   const handleChange = (e) => {

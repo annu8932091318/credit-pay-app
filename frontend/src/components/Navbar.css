@@ -1,18 +1,33 @@
 .navbar {
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
 .navbar-brand {
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
   transition: all 0.3s ease;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
+  position: relative;
+  display: inline-block;
+  animation: subtle-glow 3s infinite;
+}
+
+/* Navbar brand animation */
+@keyframes subtle-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 15px rgba(255, 255, 255, 0.3);
+  }
 }
 
 .navbar-brand:hover {
+  opacity: 0.9;
   transform: scale(1.02);
 }
 
@@ -22,31 +37,35 @@
   transition: all 0.3s ease;
   font-weight: 500 !important;
   letter-spacing: 0.02em;
-  padding: 6px 16px !important;
 }
 
-.nav-button::after {
+/* Active button indicator is now handled by inline styles */
+.active-nav-button {
+  font-weight: 600 !important;
+  position: relative;
+}
+
+/* Add some subtle animation to active nav items */
+.active-nav-button::after {
   content: '';
   position: absolute;
   bottom: 0;
   left: 50%;
-  width: 0;
-  height: 3px;
-  background-color: currentColor;
-  transition: all 0.3s ease;
   transform: translateX(-50%);
-  border-radius: 3px;
-  opacity: 0;
+  width: 30%;
+  height: 2px;
+  background-color: #fff;
+  transition: width 0.3s ease;
 }
 
-.nav-button:hover::after {
-  width: 30px;
-  opacity: 0.8;
+.active-nav-button:hover::after {
+  width: 50%;
 }
 
-.active-nav-button::after {
-  width: 30px;
-  opacity: 1;
+/* Badge styles */
+.MuiBadge-badge {
+  transform: scale(0.9);
+  transform-origin: top right;
 }
 
 /* Dark mode adjustments */
@@ -56,11 +75,14 @@
 
 /* Dark mode classes */
 .MuiPaper-root.MuiDrawer-paper[data-mui-color-scheme="dark"],
-.MuiPaper-root.MuiMenu-paper[data-mui-color-scheme="dark"],
-.MuiAppBar-root[data-mui-color-scheme="dark"] {
+.MuiPaper-root.MuiMenu-paper[data-mui-color-scheme="dark"] {
   background-color: rgba(30, 30, 30, 0.95);
   color: #f5f5f5;
   border-color: rgba(255, 255, 255, 0.08);
+}
+
+.MuiAppBar-root[data-mui-color-scheme="dark"] {
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
 }
 
 /* Enhance active item visibility in dark mode */
@@ -82,30 +104,32 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px;
-  background: linear-gradient(45deg, #0a3258 0%, #0f4c81 100%);
+  padding: 24px;
+  background: linear-gradient(135deg, #3f51b5 0%, #6573c3 100%);
   color: white;
+  position: relative;
+  overflow: hidden;
 }
 
 .drawer-list-item {
-  margin: 4px 8px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  border-radius: 12px;
+  margin-bottom: 6px;
+  transition: all 0.2s ease-in-out;
 }
 
 .drawer-list-item.active {
-  background-color: rgba(15, 76, 129, 0.1);
-  border-left: 4px solid #0f4c81;
-  font-weight: 500;
+  font-weight: 600;
+  transform: translateX(4px);
 }
 
 .drawer-list-item.active .MuiListItemIcon-root,
 .drawer-list-item.active .MuiListItemText-root {
-  color: #0f4c81;
+  color: #3f51b5;
 }
 
 .drawer-list-item:hover:not(.active) {
   background-color: rgba(0, 0, 0, 0.04);
+  transform: translateX(4px);
 }
 
 /* Dark mode */
