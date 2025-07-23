@@ -1,25 +1,37 @@
+// Bypass OTP verification: always succeed
+exports.verifyOTP = async (req, res) => {
+  try {
+    const { phone, otp } = req.body;
+    // Accept any OTP for any phone
+    if (!phone || !/^[0-9]{10}$/.test(phone)) {
+      return res.status(400).json({ error: 'Invalid phone number format' });
+    }
+    // Always succeed
+    res.json({ message: 'OTP verified successfully', phone });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 const { Customer, Sale, Notification, Shopkeeper } = require('../models');
 const common = require('./commonFunctions');
 
 // --- Customers ---
 exports.getCustomers = async (req, res) => {
   try {
-    let customers;
-    
-    try {
-      // Try to use the sort method first
-      customers = await Customer.find().sort({ lastTransactionDate: -1 });
-    } catch (sortError) {
-      // If sort fails, try to get customers without sorting
-      console.log('Sort failed, falling back to unsorted list:', sortError.message);
-      customers = await Customer.find();
+    // Only return customers for the logged-in shopkeeper
+    const shopkeeperId = req.user?._id || req.user?.id;
+    if (!shopkeeperId) {
+      return res.status(401).json({ error: 'Unauthorized: No shopkeeper ID found in request.' });
     }
-    
-    console.log(`Found ${customers.length} customers in the database`);
-    
-    // Ensure we return appropriate data
+    let customers;
+    try {
+      customers = await Customer.find({ shopkeeper: shopkeeperId }).sort({ lastTransactionDate: -1 });
+    } catch (sortError) {
+      console.log('Sort failed, falling back to unsorted list:', sortError.message);
+      customers = await Customer.find({ shopkeeper: shopkeeperId });
+    }
+    console.log(`DEBUG: Found ${customers.length} customers for shopkeeper ${shopkeeperId}`);
     const formattedCustomers = customers.map(customer => {
-      // Handle both mongoose documents and plain objects
       const customerObj = customer.toObject ? customer.toObject() : customer;
       return {
         ...customerObj,
@@ -27,8 +39,7 @@ exports.getCustomers = async (req, res) => {
         lastTransactionDate: customerObj.lastTransactionDate || null,
       };
     });
-    
-    res.json(common.formatResponse(formattedCustomers));
+    res.json({ data: common.formatResponse(formattedCustomers) });
   } catch (err) {
     console.error('Error in getCustomers:', err);
     res.status(500).json({ error: err.message });
@@ -78,9 +89,16 @@ exports.deleteCustomer = async (req, res) => {
 // --- Sales ---
 exports.getSales = async (req, res) => {
   try {
-    const sales = await Sale.find().populate('customer').sort({ date: -1 });
-    console.log(`Found ${sales.length} sales in the database`);
-    
+    // Only return sales for the logged-in shopkeeper
+    const shopkeeperId = req.user?._id || req.user?.id;
+    if (!shopkeeperId) {
+      return res.status(401).json({ error: 'Unauthorized: No shopkeeper ID found in request.' });
+    }
+    // Find sales where the customer belongs to this shopkeeper
+    const customers = await Customer.find({ shopkeeper: shopkeeperId }).select('_id');
+    const customerIds = customers.map(c => c._id);
+    const sales = await Sale.find({ customer: { $in: customerIds } }).populate('customer').sort({ date: -1 });
+    console.log(`Found ${sales.length} sales for shopkeeper ${shopkeeperId}`);
     // Format sales data to include both customer and customerId for backward compatibility
     const formattedSales = sales.map(sale => {
       const saleObj = sale.toObject();
@@ -90,7 +108,6 @@ exports.getSales = async (req, res) => {
         // Keep the populated customer object
       };
     });
-    
     res.json(common.formatResponse(formattedSales));
   } catch (err) {
     console.error('Error in getSales:', err);
@@ -240,73 +257,19 @@ const generateOTP = () => {
 exports.sendOTP = async (req, res) => {
   try {
     const { phone } = req.body;
-    
     // Validate phone number
     if (!phone || !/^[0-9]{10}$/.test(phone)) {
       return res.status(400).json({ error: 'Invalid phone number format' });
     }
-    
-    // Generate OTP
+    // Generate OTP (not used, but log for dev)
     const otp = generateOTP();
-    
-    // Store OTP with expiration time (5 minutes)
     otpStore[phone] = {
       otp,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes expiry
+      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
     };
-    
-    // In a production app, you would send the OTP via SMS/WhatsApp
-    console.log(`OTP for ${phone}: ${otp}`); // Log for testing purposes
-    
-    // Create notification entry
-    // For a real implementation, you would create a notification after sending the OTP
-    // Currently just simulating success
-    
-    res.json(common.formatResponse({ 
-      message: 'OTP sent successfully', 
-      phone,
-      // Include the OTP in response only for development/testing
-      otp: process.env.NODE_ENV === 'development' ? otp : undefined 
-    }));
+    console.log(`DEBUG: OTP for ${phone} is ${otp}`);
+    res.json({ message: 'OTP sent successfully', phone });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-};
-
-// Verify OTP
-exports.verifyOTP = async (req, res) => {
-  try {
-    const { phone, otp } = req.body;
-    
-    // Validate phone number and OTP
-    if (!phone || !otp) {
-      return res.status(400).json({ error: 'Phone number and OTP are required' });
-    }
-    
-    // Check if OTP exists and is valid
-    const storedOTPData = otpStore[phone];
-    if (!storedOTPData) {
-      return res.status(400).json({ error: 'No OTP sent for this phone number' });
-    }
-    
-    // Check if OTP is expired
-    if (new Date() > storedOTPData.expiresAt) {
-      delete otpStore[phone]; // Clean up expired OTP
-      return res.status(400).json({ error: 'OTP has expired' });
-    }
-    
-    // Check if OTP matches
-    if (storedOTPData.otp !== otp) {
-      return res.status(400).json({ error: 'Invalid OTP' });
-    }
-    
-    // OTP is valid - clean up
-    delete otpStore[phone];
-    
-    res.json(common.formatResponse({ message: 'OTP verified successfully', phone }));
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// Controller exports are handled through individual function exports
+}

@@ -30,12 +30,11 @@ import { NotificationProvider } from './components/NotificationSnackbar';
 
 // PrivateRoute component for protected routes
 const PrivateRoute = ({ children }) => {
-  // We'll still check localStorage.getItem as a fallback, but the AuthContext is preferred
-  const isAuthenticated = localStorage.getItem('token') !== null;
+  // Use AuthContext for authentication
+  const { isAuthenticated } = require('./contexts/AuthContext').useAuth();
   const location = useLocation();
 
   if (!isAuthenticated) {
-    // Redirect to login page if not authenticated
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 

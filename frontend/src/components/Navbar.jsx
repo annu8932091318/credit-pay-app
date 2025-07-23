@@ -72,12 +72,19 @@ function Navbar() {
     navigate('/');
   };
 
+
+  // Generic nav click handler: just navigate to the target path
+  const handleNavClick = (path) => (e) => {
+    e.preventDefault();
+    navigate(path);
+  };
+
   // Define navigation links
   const navItems = [
-    { label: 'Dashboard', path: '/', icon: <DashboardIcon /> },
-    { label: 'Customers', path: '/customers', icon: <PeopleIcon /> },
-    { label: 'Sales History', path: '/sales', icon: <ShoppingCartIcon /> },
-    { label: 'Notifications', path: '/notifications', icon: <NotificationsIcon />, badge: 3 },
+    { label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon />, onClick: handleNavClick('/dashboard') },
+    { label: 'Customers', path: '/customers', icon: <PeopleIcon />, onClick: handleNavClick('/customers') },
+    { label: 'Sales History', path: '/sales', icon: <ShoppingCartIcon />, onClick: handleNavClick('/sales') },
+    { label: 'Notifications', path: '/notifications', icon: <NotificationsIcon />, badge: 3, onClick: handleNavClick('/notifications') },
   ];
   
   // Profile menu options
@@ -88,7 +95,7 @@ function Navbar() {
 
   // Check if a path is active
   const isActive = (path) => {
-    if (path === '/' && location.pathname === '/') return true;
+    if (location.pathname === path) return true;
     if (path !== '/' && location.pathname.startsWith(path)) return true;
     return false;
   };
@@ -197,6 +204,7 @@ function Navbar() {
             component={Link} 
             to={item.path} 
             key={item.path}
+            onClick={item.onClick}
             sx={{ 
               mb: 0.8,
               borderRadius: 2,
@@ -314,18 +322,18 @@ function Navbar() {
                 flexGrow: isMobile ? 1 : 0
               }}
             >
-              <Typography 
-                variant="h5" 
-                component={Link} 
-                to="/" 
-                sx={{ 
-                  color: isDarkMode ? '#ffffff' : '#ffffff', 
-                  textDecoration: 'none', 
+              <Typography
+                variant="h5"
+                component="span"
+                sx={{
+                  color: isDarkMode ? '#ffffff' : '#ffffff',
+                  textDecoration: 'none',
                   fontWeight: 700,
-                  mr: {md: 4},
+                  mr: { md: 4 },
                   fontSize: { xs: '1.3rem', md: '1.5rem' },
                   letterSpacing: '0.02em',
-                  textShadow: isDarkMode ? '0 1px 2px rgba(0,0,0,0.3)' : 'none'
+                  textShadow: isDarkMode ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
+                  cursor: 'pointer'
                 }}
                 className="navbar-brand"
               >
@@ -340,6 +348,7 @@ function Navbar() {
                     key={item.path}
                     component={Link}
                     to={item.path}
+                    onClick={item.onClick}
                     sx={{ 
                       mx: 0.8,
                       px: 2.5,

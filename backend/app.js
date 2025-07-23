@@ -71,37 +71,25 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/credit-pay";
 
-mongoose
-  .connect(MONGO_URI)
+mongoose.connect(MONGO_URI)
   .then(() => {
     console.log("MongoDB connected successfully");
-    
     // Start the server
-    const server =    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
       console.log(`API available at http://localhost:${PORT}`);
-      
       // Start payment reminder scheduler
       reminderService.startReminderScheduler();
     });
-
     server.on("error", (error) => {
       console.error("Server error:", error);
     });
   })
   .catch((err) => {
-    console.error(`MongoDB connection error: ${err.message}`);
-    process.exit(1);
-  });
-
-// Connect to MongoDB (but don't make it blocking)
-mongoose.connect(MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected successfully");
-  })
-  .catch(err => {
     console.error("MongoDB connection error:", err);
-    console.log("API will run with in-memory data instead of MongoDB");
+    console.error("Full error object:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
+    console.error("MONGO_URI used:", MONGO_URI);
+    process.exit(1);
   });
 
 app.get("/", (req, res) => {

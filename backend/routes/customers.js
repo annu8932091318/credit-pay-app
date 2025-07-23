@@ -1,20 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/index');
+const shopkeeperAuth = require('../middleware/shopkeeperAuth');
 
-// Get all customers
-router.get('/', controller.getCustomers);
+// Get all customers (protected)
+router.get('/', shopkeeperAuth, controller.getCustomers);
 
-// Get customer by ID
-router.get('/:id', controller.getCustomer);
+// Get customer by ID (protected)
+router.get('/:id', shopkeeperAuth, controller.getCustomer);
 
-// Create customer
-router.post('/', controller.createCustomer);
+// Create customer (protected)
+router.post('/', shopkeeperAuth, controller.createCustomer);
 
-// Update customer
-router.put('/:id', controller.updateCustomer);
+// Update customer (protected)
+router.put('/:id', shopkeeperAuth, controller.updateCustomer);
 
-// Delete customer
-router.delete('/:id', controller.deleteCustomer);
+// Delete customer (protected)
+router.delete('/:id', shopkeeperAuth, controller.deleteCustomer);
 
 module.exports = router; 

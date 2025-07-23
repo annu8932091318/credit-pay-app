@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getCurrentUser, loginUser, registerUser } from '../api';
+import { loginShopkeeper, registerShopkeeper } from '../api';
 
 const AuthContext = createContext();
 
@@ -14,37 +14,21 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('token'));
 
   // Check if user is authenticated on app load
   useEffect(() => {
-    const checkAuth = async () => {
-      if (token) {
-        try {
-          const userData = await getCurrentUser();
-          setUser(userData.user);
-        } catch (error) {
-          console.error('Authentication check failed:', error);
-          // Clear invalid token
-          localStorage.removeItem('token');
-          setToken(null);
-        }
-      }
-      setLoading(false);
-    };
-
-    checkAuth();
-  }, [token]);
+    setLoading(false);
+  }, []);
 
   const login = async (credentials) => {
     try {
-      const response = await loginUser(credentials);
-      const { token: newToken, user: userData } = response;
-      
-      localStorage.setItem('token', newToken);
-      setToken(newToken);
+      const response = await loginShopkeeper(credentials);
+      // Save JWT token to localStorage if present
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+      }
+      const userData = response.user || response.shopkeeper || response;
       setUser(userData);
-      
       return response;
     } catch (error) {
       throw error;
@@ -53,21 +37,18 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await registerUser({
+      const response = await registerShopkeeper({
         name: userData.fullName,
         email: userData.email,
         phone: userData.phone,
         password: userData.password,
-        shopName: userData.shopName, // We'll store this separately
-        role: 'user'
+        shopName: userData.shopName
       });
-      
-      const { token: newToken, user: newUser } = response;
-      
-      localStorage.setItem('token', newToken);
-      setToken(newToken);
+      if (response.token) {
+        localStorage.setItem('token', response.token);
+      }
+      const newUser = response.user || response.shopkeeper || response;
       setUser(newUser);
-      
       return response;
     } catch (error) {
       throw error;
@@ -75,9 +56,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
     setUser(null);
+    localStorage.removeItem('token');
   };
 
   const updateUser = (userData) => {
@@ -86,7 +66,6 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
-    token,
     loading,
     login,
     register,

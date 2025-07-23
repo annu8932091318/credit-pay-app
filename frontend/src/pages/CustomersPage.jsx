@@ -90,13 +90,20 @@ function CustomersPage() {
         const customersResponse = await fetchCustomers();
         // Extract data from the response
         console.log("Customers response:", customersResponse);
-        let customersData = customersResponse.data.data || customersResponse.data;
-        
+        let customersData =
+          Array.isArray(customersResponse.data?.data)
+            ? customersResponse.data.data
+            : Array.isArray(customersResponse.data?.data?.data)
+              ? customersResponse.data.data.data
+              : Array.isArray(customersResponse.data)
+                ? customersResponse.data
+                : [];
+
         // Get sales data to calculate total owed
         const salesResponse = await fetchSales();
         console.log("Sales response:", salesResponse);
         const salesData = salesResponse.data.data || salesResponse.data;
-        
+
         // Calculate total owed and last transaction for each customer
         console.log("Processing customers data:", customersData);
         customersData = customersData.map(customer => {
@@ -106,14 +113,14 @@ function CustomersPage() {
             (sale.customerId === customer._id) || 
             (sale.customer && sale.customer._id === customer._id)
           );
-          
+
           console.log(`Found ${customerSales.length} sales for customer ${customer.name}`);
-          
+
           // Calculate total owed (pending sales)
           const totalOwed = customerSales
             .filter(sale => sale.status === 'Pending')
             .reduce((sum, sale) => sum + sale.amount, 0);
-          
+
           // Find last transaction date
           let lastTransactionDate = null;
           if (customerSales.length > 0) {
@@ -121,23 +128,23 @@ function CustomersPage() {
               Math.max(...customerSales.map(sale => new Date(sale.date)))
             );
           }
-          
+
           return {
             ...customer,
             totalOwed,
             lastTransactionDate,
           };
         });
-        
+
         // Sort by most recent transaction
         customersData.sort((a, b) => {
           if (!a.lastTransactionDate) return 1;
           if (!b.lastTransactionDate) return -1;
           return b.lastTransactionDate - a.lastTransactionDate;
         });
-        
+
         console.log("Final processed customers data:", customersData);
-        
+
         // Ensure all required properties exist
         customersData = customersData.map(customer => ({
           ...customer,
@@ -145,7 +152,7 @@ function CustomersPage() {
           totalOwed: customer.totalOwed || 0,
           lastTransactionDate: customer.lastTransactionDate || null,
         }));
-        
+
         setCustomers(customersData);
         setFilteredCustomers(customersData);
       } catch (error) {
@@ -157,7 +164,7 @@ function CustomersPage() {
     };
     
     loadCustomers();
-  }, [showNotification]);
+  }, []);
   
   // Handle search
   useEffect(() => {
@@ -861,7 +868,6 @@ function CustomersPage() {
         
         <DialogContent sx={{ mt: 2 }}>
           <TextField
-            autoFocus={!otpSent}
             margin="dense"
             name="name"
             label="Customer Name"
@@ -945,7 +951,6 @@ function CustomersPage() {
                 </Paper>
                 
                 <TextField
-                  autoFocus
                   margin="dense"
                   label="Enter OTP"
                   type="text"

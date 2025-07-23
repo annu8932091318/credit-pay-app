@@ -125,7 +125,7 @@ function SalesHistoryPage() {
     };
     
     loadSalesData();
-  }, [showNotification]);
+  }, []);
   
   // Apply filters whenever filter criteria change
   useEffect(() => {

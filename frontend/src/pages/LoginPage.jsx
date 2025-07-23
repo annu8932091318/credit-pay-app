@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+﻿// ...existing code...
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -23,6 +24,7 @@ import {
 import { useNotification } from '../components/NotificationSnackbar';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { otpLoginShopkeeper } from '../api';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -145,26 +147,39 @@ function LoginPage() {
   // Handle OTP submission
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    
     const otpValue = otp.join('');
     if (otpValue.length !== 6) {
       showNotification('Please enter a valid 6-digit OTP', 'error');
       return;
     }
-    
     setLoading(true);
-    
     try {
-      // Mock API call to verify OTP
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Store auth token (in a real app, this would come from the backend)
-      localStorage.setItem('token', 'mock-jwt-token');
-      
-      showNotification('Login successful!', 'success');
-      navigate('/dashboard');
+      // Call backend to verify OTP and get shopkeeper info and token
+      const response = await otpLoginShopkeeper(phoneNumber, otpValue);
+      // The backend should return { token, shopkeeper }
+      const { token, shopkeeper, user } = response.data || response;
+      if (token && (shopkeeper || user)) {
+        // Store token and update user context using AuthContext's login logic
+        localStorage.setItem('token', token);
+        // Use setUser from AuthContext if available, or call login with the user/shopkeeper object
+        if (typeof login === 'function') {
+          // login expects credentials, but we want to just set user and token
+          // So, set user directly if possible
+          // If login supports direct user setting, use it; otherwise, setUser manually
+          // Here, we assume login can accept an object with user/shopkeeper and token
+          await login({ token, user: shopkeeper || user });
+        }
+        showNotification('Login successful!', 'success');
+        navigate('/dashboard');
+      } else {
+        showNotification('No shopkeeper found for this phone number. Please check your number or sign up.', 'error');
+      }
     } catch (error) {
-      showNotification('Invalid OTP. Please try again.', 'error');
+      if (error?.response?.data?.error === 'No shopkeeper found for this phone number') {
+        showNotification('No shopkeeper found for this phone number. Please check your number or sign up.', 'error');
+      } else {
+        showNotification('Invalid OTP. Please try again.', 'error');
+      }
     } finally {
       setLoading(false);
     }

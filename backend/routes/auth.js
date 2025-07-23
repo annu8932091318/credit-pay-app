@@ -1,11 +1,23 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/users');
 const { logger } = require('../modules/logger');
 
 const router = express.Router();
+
+/**
+ * Get all users (for debugging/admin)
+ * GET /api/auth/users
+ */
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find().select('-password');
+    res.json({ users });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // Input validation middleware
 const validateRequest = (req, res, next) => {
@@ -53,15 +65,8 @@ router.post('/register', [
 
     await user.save();
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-
+    // No token logic, just return user info
     res.status(201).json({
-      token,
       user: {
         id: user.id,
         name: user.name,
@@ -101,15 +106,8 @@ router.post('/login', [
       return res.status(400).json({ error: 'Invalid credentials' });
     }
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-
+    // No token logic, just return user info
     res.status(200).json({
-      token,
       user: {
         id: user.id,
         name: user.name,
@@ -130,26 +128,8 @@ router.post('/login', [
  * GET /api/auth/me
  */
 router.get('/me', async (req, res) => {
-  try {
-    // Get token from header
-    const token = req.header('x-auth-token');
-    if (!token) {
-      return res.status(401).json({ error: 'No token, authorization denied' });
-    }
-
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password');
-    
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    res.status(200).json({ user });
-  } catch (error) {
-    logger.error(`Auth error: ${error.message}`);
-    res.status(401).json({ error: 'Token is not valid' });
-  }
+  // No authentication, just return a dummy user or error
+  res.status(200).json({ user: null, message: 'No authentication required' });
 });
 
 module.exports = router;

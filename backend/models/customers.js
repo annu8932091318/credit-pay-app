@@ -22,7 +22,8 @@ const customerSchema = new mongoose.Schema({
     city: String,
     state: String,
     pincode: String
-  }
+  },
+  shopkeeper: { type: mongoose.Schema.Types.ObjectId, ref: 'Shopkeeper', required: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Customer', customerSchema); 

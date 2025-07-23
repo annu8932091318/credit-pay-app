@@ -47,15 +47,14 @@ const pendingRequests = new Map();
 // Add a request interceptor to include the token and prevent duplicate requests
 api.interceptors.request.use(
   config => {
+    // Attach JWT token from localStorage if present
     const token = localStorage.getItem('token');
     if (token) {
-      config.headers['x-auth-token'] = token;
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
-    
     // For GET requests, check if identical request is already pending
     if (config.method === 'get') {
       const requestKey = `${config.method}:${config.url}`;
-      
       if (pendingRequests.has(requestKey)) {
         // Return the existing promise to avoid duplicate request
         console.log(`Preventing duplicate request: ${requestKey}`);
@@ -64,15 +63,12 @@ api.interceptors.request.use(
           config
         });
       }
-      
       // Store the request promise
       const requestPromise = new Promise((resolve) => {
         config.requestPromiseResolve = resolve;
       });
-      
       pendingRequests.set(requestKey, requestPromise);
     }
-    
     return config;
   },
   error => {
@@ -112,33 +108,25 @@ api.interceptors.response.use(
 );
 
 // --- Authentication ---
-export const registerUser = async (userData) => {
+// --- Shopkeeper Authentication ---
+export const registerShopkeeper = async (shopkeeperData) => {
   try {
-    const response = await api.post('/auth/register', userData);
+    const response = await api.post('/shopkeepers/register', shopkeeperData);
     return response.data;
   } catch (error) {
-    console.error('Registration API Error:', error.response?.data || error);
+    console.error('Shopkeeper Registration API Error:', error.response?.data || error);
     throw error.response?.data || { error: 'Registration failed. Please try again later.' };
   }
 };
 
-export const loginUser = async (credentials) => {
+export const loginShopkeeper = async (credentials) => {
   try {
-    const response = await api.post('/auth/login', credentials);
+    const response = await api.post('/shopkeepers/login', credentials);
     return response.data;
   } catch (error) {
     throw error.response?.data || error;
   }
 };
-
-export const getCurrentUser = async () => {
-  try {
-    const response = await api.get('/auth/me');
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error;
-  }
-}
 
 // Customers
 export const fetchCustomers = async (noCache = false) => {
@@ -222,6 +210,9 @@ export const triggerReminders = () => api.post('/notifications/trigger-reminders
 // OTP related functions
 export const sendOTP = (phone) => api.post('/notifications/send-otp', { phone });
 export const verifyOTP = (phone, otp) => api.post('/notifications/verify-otp', { phone, otp });
+
+// Shopkeeper OTP login (for dev mode, accepts any OTP)
+export const otpLoginShopkeeper = (phone, otp) => api.post('/shopkeepers/otp-login', { phone, otp });
 
 // Shopkeepers
 export const fetchShopkeepers = () => api.get('/shopkeepers');
