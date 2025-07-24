@@ -129,6 +129,21 @@ exports.createSale = async (req, res) => {
   try {
     const sale = new Sale(req.body);
     await sale.save();
+    // If sale is pending or partial, increment customer's totalOwed
+    if (['PENDING', 'PARTIAL'].includes(sale.status)) {
+      await Customer.findByIdAndUpdate(
+        sale.customer,
+        { $inc: { totalOwed: sale.amount }, $set: { lastTransactionDate: sale.date } },
+        { new: true }
+      );
+    } else if (sale.status === 'PAID') {
+      // If paid, update lastTransactionDate only
+      await Customer.findByIdAndUpdate(
+        sale.customer,
+        { $set: { lastTransactionDate: sale.date } },
+        { new: true }
+      );
+    }
     res.status(201).json(common.formatResponse(sale));
   } catch (err) {
     res.status(400).json({ error: err.message });

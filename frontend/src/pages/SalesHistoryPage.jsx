@@ -60,11 +60,13 @@ import { fetchSales, fetchCustomers, createNotification } from '../api';
 import { useNotification } from '../components/NotificationSnackbar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import commonStyles from '../styles/commonStyles';
+import { useAuth } from '../contexts/AuthContext';
 
 function SalesHistoryPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { showNotification } = useNotification();
+  const { user } = useAuth(); // Get current shopkeeper
   
   // States
   const [sales, setSales] = useState([]);
@@ -95,12 +97,24 @@ function SalesHistoryPage() {
         // Get sales data
         const salesResponse = await fetchSales();
         let salesData = salesResponse.data;
-        
+
+        // Filter sales by shopkeeper
+        const shopkeeperId = user?._id || user?.id;
+        if (shopkeeperId) {
+          salesData = salesData.filter(sale => {
+            // sale.shopkeeper can be string or object
+            if (typeof sale.shopkeeper === 'object' && sale.shopkeeper !== null) {
+              return sale.shopkeeper._id === shopkeeperId || sale.shopkeeper.id === shopkeeperId;
+            }
+            return sale.shopkeeper === shopkeeperId;
+          });
+        }
+
         // Get customer data
         const customersResponse = await fetchCustomers();
         const customersData = customersResponse.data;
         setCustomers(customersData);
-        
+
         // Enrich sales data with customer information
         salesData = salesData.map(sale => {
           const customer = customersData.find(c => c._id === (sale.customer || sale.customerId)) || {};
@@ -110,10 +124,10 @@ function SalesHistoryPage() {
             customerPhone: customer.phone || '',
           };
         });
-        
+
         // Sort by most recent
         salesData.sort((a, b) => new Date(b.date) - new Date(a.date));
-        
+
         setSales(salesData);
         setFilteredSales(salesData);
       } catch (error) {
@@ -125,7 +139,7 @@ function SalesHistoryPage() {
     };
     
     loadSalesData();
-  }, []);
+  }, [user]);
   
   // Apply filters whenever filter criteria change
   useEffect(() => {
@@ -825,7 +839,7 @@ function SalesHistoryPage() {
                           <Typography variant="body2" color="text.secondary" gutterBottom>
                             Amount
                           </Typography>
-                          <Typography variant="h6" fontWeight={600} color="primary.main">
+                          <Typography variant="h6" fontWeight={600} color="primary.main" gutterBottom>
                             {formatCurrency(sale.amount)}
                           </Typography>
                         </Grid>
@@ -1141,4 +1155,4 @@ function SalesHistoryPage() {
   );
 }
 
-export default SalesHistoryPage; 
+export default SalesHistoryPage;

@@ -235,7 +235,8 @@ function LoginPage() {
   // Check if user is already logged in
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
+    // Only redirect if not already on dashboard
+    if (token && window.location.pathname !== '/dashboard') {
       navigate('/dashboard');
     }
   }, [navigate]);
@@ -354,7 +355,6 @@ function LoginPage() {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
-                autoFocus
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 InputProps={{
@@ -452,7 +452,6 @@ function LoginPage() {
                     label="Mobile Number"
                     name="phone"
                     autoComplete="tel"
-                    autoFocus
                     value={phoneNumber}
                     onChange={handlePhoneChange}
                     InputProps={{

@@ -52,7 +52,7 @@ function AddSalePage() {
   // Form states
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [amount, setAmount] = useState('');
-  const [paymentStatus, setPaymentStatus] = useState('Pending');
+  const [paymentStatus, setPaymentStatus] = useState('PENDING');
   const [notes, setNotes] = useState('');
   const [formErrors, setFormErrors] = useState({});
   
@@ -62,7 +62,15 @@ function AddSalePage() {
       setLoading(true);
       try {
         const response = await fetchCustomers();
-        setCustomers(response.data || []);
+        let customersData =
+          Array.isArray(response.data?.data)
+            ? response.data.data
+            : Array.isArray(response.data?.data?.data)
+              ? response.data.data.data
+              : Array.isArray(response.data)
+                ? response.data
+                : [];
+        setCustomers(customersData);
       } catch (error) {
         console.error('Failed to load customers:', error);
         showNotification('Failed to load customers data', 'error');
@@ -70,7 +78,6 @@ function AddSalePage() {
         setLoading(false);
       }
     };
-    
     loadCustomers();
   }, [showNotification]);
   
@@ -115,7 +122,7 @@ function AddSalePage() {
       setTimeout(() => {
         setSelectedCustomer(null);
         setAmount('');
-        setPaymentStatus('Pending');
+        setPaymentStatus('PENDING');
         setNotes('');
         setFormErrors({});
         setShowSuccess(false);
@@ -130,6 +137,10 @@ function AddSalePage() {
     }
   };
   
+  // Format currency with INR symbol
+  const formatCurrency = (amount) => {
+    return `₹${amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+  };
   // Handle amount change with validation
   const handleAmountChange = (e) => {
     const value = e.target.value;
@@ -234,7 +245,7 @@ function AddSalePage() {
               onClick={() => {
                 setSelectedCustomer(null);
                 setAmount('');
-                setPaymentStatus('Pending');
+                setPaymentStatus('PENDING');
                 setNotes('');
                 setFormErrors({});
                 setShowSuccess(false);
@@ -267,7 +278,7 @@ function AddSalePage() {
                 {/* Customer Selection */}
                 <Grid item xs={12}>
                   <Autocomplete
-                    options={customers}
+                    options={Array.isArray(customers) ? customers : []}
                     getOptionLabel={(option) => `${option.name} (${option.phone})`}
                     value={selectedCustomer}
                     onChange={(event, newValue) => {
@@ -349,7 +360,7 @@ function AddSalePage() {
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <MoneyIcon color="primary" />
+                          <span style={{fontWeight:600, fontSize:'1.2em'}}>₹</span>
                         </InputAdornment>
                       ),
                     }}
@@ -415,7 +426,7 @@ function AddSalePage() {
                         onChange={(e) => setPaymentStatus(e.target.value)}
                       >
                         <FormControlLabel 
-                          value="Paid" 
+                          value="PAID" 
                           control={
                             <Radio color="success" />
                           } 
@@ -428,13 +439,13 @@ function AddSalePage() {
                           sx={{ mr: 4 }}
                         />
                         <FormControlLabel 
-                          value="Pending" 
+                          value="PENDING" 
                           control={
                             <Radio color="warning" />
                           } 
                           label={
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <MoneyIcon color="warning" fontSize="small" sx={{ mr: 0.5 }} />
+                              <span style={{color:'#ff9800', fontWeight:600, fontSize:'1.1em', marginRight:6}}>₹</span>
                               <Typography fontWeight={500}>Credit (Pay Later)</Typography>
                             </Box>
                           }

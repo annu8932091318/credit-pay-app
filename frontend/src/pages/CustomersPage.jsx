@@ -52,12 +52,14 @@ import { useNotification } from '../components/NotificationSnackbar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ConfirmDialog from '../components/ConfirmDialog';
 import commonStyles from '../styles/commonStyles';
+import { useAuth } from '../contexts/AuthContext';
 
 function CustomersPage() {
   const navigate = useNavigate();
   const theme = useTheme();
   const { showNotification } = useNotification();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const { user } = useAuth(); // Get current shopkeeper
   
   // States
   const [customers, setCustomers] = useState([]);
@@ -117,9 +119,14 @@ function CustomersPage() {
           console.log(`Found ${customerSales.length} sales for customer ${customer.name}`);
 
           // Calculate total owed (pending sales)
-          const totalOwed = customerSales
-            .filter(sale => sale.status === 'Pending')
+          const calculatedOwed = customerSales
+            .filter(sale => sale.status === 'PENDING' || sale.status === 'PARTIAL')
             .reduce((sum, sale) => sum + sale.amount, 0);
+
+          // Use database value if present and > 0
+          const totalOwed = (typeof customer.totalOwed === 'number' && customer.totalOwed > 0)
+            ? customer.totalOwed
+            : calculatedOwed;
 
           // Find last transaction date
           let lastTransactionDate = null;
@@ -184,11 +191,7 @@ function CustomersPage() {
   
   // Format currency
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(amount);
+    return `₹${amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
   };
   
   // Format date
@@ -291,8 +294,10 @@ function CustomersPage() {
     setLoading(true);
     
     try {
+      // Add shopkeeper ID to customer data
+      const payload = { ...newCustomer, shopkeeper: user?._id || user?.id };
       // Create customer
-      const response = await createCustomer(newCustomer);
+      const response = await createCustomer(payload);
       const createdCustomer = response.data;
       
       // Add to state with default values
@@ -712,7 +717,7 @@ function CustomersPage() {
                             bgcolor: theme => theme.palette.primary.main
                           }}
                         >
-                          {customer.name.charAt(0)}
+                          {customer.name ? customer.name.charAt(0) : '?'}
                         </Avatar>
                         <Box>
                           <Typography variant="h6" component="div" fontWeight={600}>
@@ -826,6 +831,8 @@ function CustomersPage() {
           setOtpError('');
           setFormErrors({});
         }}
+        disableAutoFocus={true}
+        disableEnforceFocus={true}
         PaperProps={{
           sx: {
             borderRadius: 2,
@@ -1045,4 +1052,4 @@ function CustomersPage() {
   );
 }
 
-export default CustomersPage; 
+export default CustomersPage;

@@ -17,6 +17,11 @@ export const AuthProvider = ({ children }) => {
 
   // Check if user is authenticated on app load
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Optionally, decode token or fetch user info from backend
+      setUser({ token }); // Replace with actual user info if available
+    }
     setLoading(false);
   }, []);
 
